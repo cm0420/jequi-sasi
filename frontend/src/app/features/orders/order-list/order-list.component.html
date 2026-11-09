@@ -1,0 +1,65 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/cliente" label="Minha conta" />
+
+    <h1 class="font-display text-4xl text-ink mb-8">Meus pedidos</h1>
+
+    @if (loading()) {
+      <p class="font-body text-sm text-ink/60">Carregando…</p>
+    } @else if (placedOrders().length === 0) {
+      <div class="bg-surface border border-hairline rounded-3xl p-10 text-center flex flex-col items-center gap-4">
+        <p class="font-body text-lg text-ink/70">Você ainda não fez nenhum pedido.</p>
+        <a
+          routerLink="/"
+          class="font-body text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 transition-shadow"
+        >
+          Ver catálogo
+        </a>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (order of placedOrders(); track order.id) {
+          <a
+            [routerLink]="['/pedidos', order.id]"
+            class="block bg-surface border border-hairline rounded-3xl p-5 hover:border-forest transition-colors"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-body text-xs uppercase tracking-wide" [class]="statusClass(order.status)">
+                {{ statusLabel[order.status] }}
+              </span>
+              <span class="font-body text-xs text-ink/50">{{ order.createdAt | date: 'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="font-body text-ink">
+              {{ order.items.length }} {{ order.items.length === 1 ? 'item' : 'itens' }}
+            </p>
+            <p class="font-body font-semibold text-ink mt-1">{{ order.totalAmount | currency: 'BRL' }}</p>
+          </a>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-4 mt-10">
+          <button
+            type="button"
+            (click)="goToPage(-1)"
+            [disabled]="!hasPrev()"
+            class="font-body text-xs uppercase tracking-wide px-4 py-2 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Anterior
+          </button>
+          <span class="font-body text-xs text-ink/70">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="goToPage(1)"
+            [disabled]="!hasNext()"
+            class="font-body text-xs uppercase tracking-wide px-4 py-2 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Próxima
+          </button>
+        </div>
+      }
+    }
+  </main>
+</div>

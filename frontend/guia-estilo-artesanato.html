@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Barro & Vinil — Guia de Estilo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root{
+    --terracota: #C1592B;
+    --grafite: #2B2622;
+    --dourado: #C99A3D;
+    --osso: #EDE3D3;
+    --vinho: #6E2A2A;
+    --areia: #D8C4A0;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--osso);
+    color:var(--grafite);
+    font-family:'Lora', serif;
+    padding:0 0 80px;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:0 32px;}
+
+  header.top{
+    background:var(--grafite);
+    color:var(--osso);
+    padding:56px 32px;
+    text-align:center;
+    border-bottom:6px solid var(--dourado);
+  }
+  header.top h1{
+    font-family:'Oswald', sans-serif;
+    font-weight:700;
+    font-size:52px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+  header.top p{
+    font-family:'JetBrains Mono', monospace;
+    color:var(--dourado);
+    margin-top:8px;
+    font-size:13px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+
+  section{padding:56px 0; border-bottom:1px solid var(--areia);}
+  h2.section-title{
+    font-family:'Oswald', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-size:14px;
+    color:var(--vinho);
+    margin-bottom:24px;
+    display:flex; align-items:center; gap:12px;
+  }
+  h2.section-title::after{content:""; flex:1; height:1px; background:var(--areia);}
+
+  /* PALETA */
+  .swatches{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .swatch{border-radius:4px; overflow:hidden; border:1px solid rgba(0,0,0,.1);}
+  .swatch .fill{height:100px;}
+  .swatch .label{
+    background:#fff; padding:10px 14px; font-family:'JetBrains Mono', monospace; font-size:12px;
+  }
+  .swatch .label b{display:block; font-family:'Oswald',sans-serif; font-size:14px; letter-spacing:.5px; margin-bottom:2px; text-transform:uppercase;}
+  .swatch .label span{color:#777;}
+  .rule{
+    margin-top:20px; font-size:14px; color:#555; line-height:1.6;
+  }
+  .rule b{color:var(--grafite);}
+
+  /* TIPOGRAFIA */
+  .type-block{margin-bottom:28px;}
+  .type-tag{font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--vinho); margin-bottom:6px;}
+  .display-demo{font-family:'Oswald',sans-serif; font-weight:700; font-size:40px; text-transform:uppercase; letter-spacing:1px;}
+  .body-demo{font-family:'Lora',serif; font-size:18px; line-height:1.6; max-width:520px;}
+  .mono-demo{font-family:'JetBrains Mono',monospace; font-size:14px; letter-spacing:.5px;}
+
+  /* SELO / SIGNATURE ELEMENT */
+  .selo{
+    width:120px; height:120px; border-radius:50%;
+    border:3px solid var(--grafite);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald',sans-serif; text-align:center; font-size:11px;
+    letter-spacing:1px; text-transform:uppercase; color:var(--grafite);
+    position:relative;
+  }
+  .selo::before{
+    content:""; position:absolute; inset:8px; border:1px dashed var(--dourado); border-radius:50%;
+  }
+
+  /* COMPONENTES */
+  .card-demo{
+    display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;
+  }
+  .product-card{
+    width:220px; background:#fff; border:1px solid var(--areia); border-radius:6px; overflow:hidden;
+  }
+  .product-card .img{
+    height:160px; background:linear-gradient(135deg, var(--terracota), #a8461f);
+    display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.6); font-family:'JetBrains Mono',monospace; font-size:11px;
+  }
+  .product-card .info{padding:16px;}
+  .product-card .cat{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--vinho);}
+  .product-card h3{font-family:'Oswald',sans-serif; font-size:18px; text-transform:uppercase; margin:4px 0 8px; letter-spacing:.5px;}
+  .product-card .price{font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--grafite); font-size:15px;}
+
+  .btn{
+    display:inline-block; font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:1px;
+    font-size:13px; padding:12px 28px; border-radius:2px; border:2px solid var(--grafite);
+    background:var(--terracota); color:var(--osso); cursor:pointer; font-weight:600;
+  }
+  .btn.secondary{background:transparent; color:var(--grafite);}
+
+  .tag{
+    display:inline-block; background:var(--dourado); color:var(--grafite);
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:4px 10px; border-radius:2px; letter-spacing:.5px;
+  }
+
+  code.hex{font-family:'JetBrains Mono',monospace; background:#fff; padding:2px 6px; border-radius:3px; border:1px solid var(--areia);}
+
+  footer{padding:40px 32px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; color:#999; letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Barro &amp; Vinil</h1>
+  <p>Guia de estilo — v1</p>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2 class="section-title">01 · Paleta</h2>
+  <div class="swatches">
+    <div class="swatch"><div class="fill" style="background:var(--terracota)"></div><div class="label"><b>Terracota</b><span>#C1592B</span></div></div>
+    <div class="swatch"><div class="fill" style="background:var(--grafite)"></div><div class="label"><b>Grafite</b><span>#2B2622</span></div></div>
+    <div class="swatch"><div class="fill" style="background:var(--dourado)"></div><div class="label"><b>Dourado</b><span>#C99A3D</span></div></div>
+    <div class="swatch"><div class="fill" style="background:var(--osso)"></div><div class="label"><b>Osso</b><span>#EDE3D3</span></div></div>
+    <div class="swatch"><div class="fill" style="background:var(--vinho)"></div><div class="label"><b>Vinho</b><span>#6E2A2A</span></div></div>
+    <div class="swatch"><div class="fill" style="background:var(--areia)"></div><div class="label"><b>Areia</b><span>#D8C4A0</span></div></div>
+  </div>
+  <p class="rule">
+    <b>Como usar:</b> <code class="hex">#EDE3D3</code> é o fundo principal (nunca branco puro — mantém o clima de barro). <code class="hex">#C1592B</code> carrega a identidade (botões, links, destaques). <code class="hex">#2B2622</code> substitui o preto puro em textos e bordas — é um "quase-preto" quente, mais couro do que tinta. <code class="hex">#C99A3D</code> e <code class="hex">#6E2A2A</code> são pontuais: selos, tags, hover, citações. Regra de proporção: 60% osso/areia, 25% terracota/grafite, 15% dourado/vinho.
+  </p>
+</section>
+
+<section>
+  <h2 class="section-title">02 · Tipografia</h2>
+  <div class="type-block">
+    <div class="type-tag">Display — Oswald 700 (títulos, categorias, preços em destaque)</div>
+    <div class="display-demo">Moringa Pintada à Mão</div>
+  </div>
+  <div class="type-block">
+    <div class="type-tag">Corpo — Lora (descrições, textos longos)</div>
+    <div class="body-demo">Cada peça é pintada uma a uma. As cores e traços variam levemente — isso não é defeito, é assinatura.</div>
+  </div>
+  <div class="type-block">
+    <div class="type-tag">Utilitária — JetBrains Mono (preços, tags, metadados)</div>
+    <div class="mono-demo">R$ 89,00 · PRONTA ENTREGA · COD. #014</div>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">03 · Elemento-assinatura</h2>
+  <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+    <div class="selo">SELO<br>BARRO &amp; VINIL</div>
+    <p class="rule" style="margin-top:0; max-width:480px;">
+      Um "selo de barro" circular — como se fosse carimbado na peça ainda mole. Usa-se no logo, em categorias e em selos de "peça única" / "feito à mão". É o único elemento decorativo recorrente do site; tudo o resto é limpo e sóbrio.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">04 · Componentes</h2>
+  <div class="card-demo">
+    <div class="product-card">
+      <div class="img">foto do produto</div>
+      <div class="info">
+        <div class="cat">Moringa</div>
+        <h3>Moringa Sol</h3>
+        <div class="price">R$ 120,00</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div><span class="tag">peça única</span></div>
+      <button class="btn">Comprar</button>
+      <button class="btn secondary">Ver detalhes</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>BARRO &amp; VINIL — GUIA PARA DESENVOLVIMENTO — 2026</footer>
+
+</body>
+</html>

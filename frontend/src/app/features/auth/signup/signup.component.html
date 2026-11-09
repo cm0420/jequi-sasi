@@ -1,0 +1,130 @@
+<div class="min-h-screen flex items-center justify-center px-4 py-10">
+  <div class="w-full max-w-md">
+    <app-back-link to="/" label="Voltar ao catálogo" />
+
+    <div class="text-center mb-8">
+      <p class="font-body text-xs tracking-[2px] uppercase text-clay mb-1">Jequí</p>
+      <h1 class="font-display text-5xl text-ink">Criar conta</h1>
+    </div>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="bg-surface border border-hairline rounded-3xl p-5 sm:p-8 flex flex-col gap-5"
+    >
+      @if (errorMessage()) {
+        <p role="alert" class="font-body text-xs text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="firstName" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Nome</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            autocomplete="given-name"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+          />
+          @if (form.controls.firstName.invalid && form.controls.firstName.touched) {
+            <span class="font-body text-[11px] text-danger">Obrigatório.</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="lastName" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Sobrenome</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            autocomplete="family-name"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+          />
+          @if (form.controls.lastName.invalid && form.controls.lastName.touched) {
+            <span class="font-body text-[11px] text-danger">Obrigatório.</span>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="email" class="font-body text-[11px] tracking-wide uppercase text-ink/70">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+        />
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+          <span class="font-body text-[11px] text-danger">Informe um e-mail válido.</span>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="password" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Senha</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+        />
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <span class="font-body text-[11px] text-danger">Mínimo de 8 caracteres.</span>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="phone" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Telefone</label>
+          <input
+            id="phone"
+            type="tel"
+            inputmode="tel"
+            maxlength="16"
+            appMask="phone"
+            formControlName="phone"
+            placeholder="(11) 91234-5678"
+            autocomplete="tel"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+          />
+          @if (form.controls.phone.invalid && form.controls.phone.touched) {
+            <span class="font-body text-[11px] text-danger">Telefone inválido.</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="cpf" class="font-body text-[11px] tracking-wide uppercase text-ink/70">CPF</label>
+          <input
+            id="cpf"
+            type="text"
+            inputmode="numeric"
+            maxlength="14"
+            appMask="cpf"
+            formControlName="cpf"
+            placeholder="000.000.000-00"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+          />
+          @if (form.controls.cpf.invalid && form.controls.cpf.touched) {
+            <span class="font-body text-[11px] text-danger">CPF inválido.</span>
+          }
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="btn font-body font-semibold text-base px-7 py-3 rounded-full border border-ink bg-forest text-canvas  disabled:opacity-60"
+      >
+        {{ loading() ? 'Criando conta…' : 'Criar conta' }}
+      </button>
+    </form>
+
+    <p class="text-center font-body text-base text-ink/70 mt-6">
+      Já tem conta?
+      <a routerLink="/login" class="text-clay underline">Entrar</a>
+    </p>
+  </div>
+</div>

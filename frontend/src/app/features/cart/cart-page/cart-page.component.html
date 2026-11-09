@@ -1,0 +1,88 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/cliente" label="Minha conta" />
+
+    <h1 class="font-display text-4xl text-ink mb-8">Seu carrinho</h1>
+
+    @if (loading()) {
+      <p class="font-body text-sm text-ink/60">Carregando…</p>
+    } @else if (!cart() || cart()!.items.length === 0) {
+      <div class="bg-surface border border-hairline rounded-3xl p-10 text-center flex flex-col items-center gap-4">
+        <p class="font-body text-lg text-ink/70">Seu carrinho ainda está vazio.</p>
+        <a
+          routerLink="/"
+          class="font-body text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 transition-shadow"
+        >
+          Ver catálogo
+        </a>
+      </div>
+    } @else {
+      @let c = cart()!;
+      <div class="flex flex-col gap-4">
+        @for (item of c.items; track item.id) {
+          <div
+            class="bg-surface border border-hairline rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-opacity"
+            [class.opacity-50]="updatingItemId() === item.id"
+          >
+            <div class="flex-1 min-w-0">
+              <h3 class="font-display text-lg text-ink tracking-wide truncate">{{ item.itemName }}</h3>
+              <p class="font-body text-xs text-ink/60 mt-1">{{ item.unitPrice | currency: 'BRL' }} / un.</p>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-start gap-4">
+              <div class="flex items-center border border-hairline rounded-xl overflow-hidden shrink-0">
+                <button
+                  type="button"
+                  (click)="decrementQuantity(item)"
+                  [disabled]="item.quantity <= 1 || updatingItemId() === item.id"
+                  class="w-10 h-10 flex items-center justify-center font-body text-ink hover:bg-canvas transition-colors disabled:opacity-30"
+                >
+                  −
+                </button>
+                <span class="w-9 text-center font-body text-sm text-ink">{{ item.quantity }}</span>
+                <button
+                  type="button"
+                  (click)="incrementQuantity(item)"
+                  [disabled]="updatingItemId() === item.id"
+                  class="w-10 h-10 flex items-center justify-center font-body text-ink hover:bg-canvas transition-colors disabled:opacity-30"
+                >
+                  +
+                </button>
+              </div>
+
+              <span class="font-body font-semibold text-ink text-sm w-20 text-right shrink-0">
+                {{ item.subtotal | currency: 'BRL' }}
+              </span>
+
+              <button
+                type="button"
+                (click)="removeItem(item)"
+                [disabled]="updatingItemId() === item.id"
+                aria-label="Remover"
+                class="shrink-0 flex items-center justify-center h-9 w-9 rounded-full text-ink/40 hover:text-canvas hover:bg-clay transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5,5 L19,19 M19,5 L5,19" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="flex items-center justify-between mt-8 pt-6 border-t border-hairline">
+        <span class="font-body text-sm uppercase tracking-wide text-ink/70">Total</span>
+        <span class="font-body font-semibold text-2xl text-ink">{{ c.totalAmount | currency: 'BRL' }}</span>
+      </div>
+
+      <a
+        routerLink="/checkout"
+        class="mt-6 block text-center font-body font-semibold text-base px-7 py-3.5 rounded-full border border-ink bg-forest text-canvas  transition duration-300 active:scale-[0.98]"
+      >
+        Finalizar compra
+      </a>
+    }
+  </main>
+</div>

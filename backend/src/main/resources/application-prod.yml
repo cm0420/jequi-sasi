@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    root: warn
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  payment:
+    provider: fake  # trocar quando houver gateway real (só existe FakePaymentGateway)
+  shipping:
+    provider: fake  # trocar quando houver integração real (só existe FakeShippingProvider)
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:3600000}
+
+server:
+  # IP real do cliente a partir do X-Forwarded-For do load balancer da hospedagem
+  # (o limite de login/cadastro é por IP; sem isso todo mundo teria o IP do balanceador)
+  forward-headers-strategy: native
+  error:
+    include-stacktrace: never
+    include-message: never

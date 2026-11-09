@@ -1,0 +1,104 @@
+<div class="min-h-screen">
+
+  <main id="conteudo" class="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/admin/pecas" label="Peças" />
+
+    <h1 class="font-display text-4xl text-ink mb-8">
+      {{ isEditing() ? 'Editar peça' : 'Nova peça' }}
+    </h1>
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else {
+      @if (errorMessage()) {
+        <p role="alert" class="font-body text-sm text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface border border-hairline rounded-3xl p-5 sm:p-8 flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="f-name" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Nome</label>
+          <input id="f-name"
+ autocomplete="off"
+            type="text"
+            formControlName="name"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="f-description" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Descrição</label>
+          <textarea id="f-description"
+ autocomplete="off"
+            formControlName="description"
+            rows="3"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10 resize-none"
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="f-price" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Preço (R$)</label>
+            <input id="f-price"
+ autocomplete="off"
+              type="number"
+              step="0.01"
+              formControlName="price"
+              class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="f-stock" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Estoque inicial</label>
+            <input id="f-stock"
+ autocomplete="off"
+              type="number"
+              formControlName="stock"
+              class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+            />
+          </div>
+        </div>
+
+        @if (categories().length > 0) {
+          <div class="flex flex-col gap-2">
+            <label for="f-imageUrls" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Categorias</label>
+            <div class="flex flex-wrap gap-2">
+              @for (category of categories(); track category.id) {
+                <button
+                  type="button"
+                  (click)="toggleCategory(category.id)"
+                  class="font-body text-sm uppercase tracking-wide px-4 py-2 rounded-full border transition-colors"
+                  [class.bg-forest]="selectedCategoryIds().has(category.id)"
+                  [class.text-canvas]="selectedCategoryIds().has(category.id)"
+                  [class.border-forest]="selectedCategoryIds().has(category.id)"
+                  [class.border-hairline]="!selectedCategoryIds().has(category.id)"
+                  [class.text-ink]="!selectedCategoryIds().has(category.id)"
+                >
+                  {{ category.name }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-body text-[11px] tracking-wide uppercase text-ink/70">URLs de imagem (uma por linha, opcional)</label>
+          <textarea id="f-imageUrls"
+ autocomplete="off"
+            formControlName="imageUrls"
+            rows="2"
+            class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10 resize-none"
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="mt-2 font-body font-semibold text-base px-7 py-3.5 rounded-full border border-ink bg-forest text-canvas  disabled:opacity-60"
+        >
+          {{ submitting() ? 'Salvando…' : isEditing() ? 'Salvar alterações' : 'Criar peça' }}
+        </button>
+      </form>
+    }
+  </main>
+</div>

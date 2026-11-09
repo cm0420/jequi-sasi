@@ -1,0 +1,215 @@
+<main id="conteudo" class="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-10">
+  <!-- Cabeçalho + filtros de período (uma linha, acima de todos os gráficos) -->
+  <header class="flex flex-col xl:flex-row xl:items-end justify-between gap-5 mb-8">
+    <div>
+      <p class="font-body text-xs font-semibold uppercase tracking-[0.16em] text-clay mb-2">Visão geral</p>
+      <h1 class="font-display text-4xl sm:text-5xl text-ink">Como a loja está indo</h1>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="inline-flex p-1 rounded-full bg-cream/80 border border-hairline" role="group" aria-label="Período">
+        @for (d of presets; track d) {
+          <button
+            type="button"
+            (click)="choosePreset(d)"
+            [attr.aria-pressed]="preset() === d"
+            [class]="'font-body text-sm font-semibold h-10 px-4 rounded-full ' + (preset() === d ? 'bg-ink text-canvas shadow-soft' : 'text-stone hover:text-ink')"
+          >{{ d === 365 ? '12 meses' : d + ' dias' }}</button>
+        }
+      </div>
+      <div class="flex items-center gap-2 rounded-full border border-hairline bg-surface/80 pl-4 pr-1 h-12">
+        <label for="d-inicio" class="sr-only">Data inicial</label>
+        <input id="d-inicio" #inicio type="date" [value]="startDate()" [max]="today"
+               class="bg-transparent font-body text-sm text-ink focus:outline-none tabular-nums" />
+        <span class="text-stone" aria-hidden="true">→</span>
+        <label for="d-fim" class="sr-only">Data final</label>
+        <input id="d-fim" #fim type="date" [value]="endDate()" [max]="today"
+               class="bg-transparent font-body text-sm text-ink focus:outline-none tabular-nums" />
+        <button type="button" (click)="setCustomRange(inicio.value, fim.value)"
+                class="h-10 px-4 rounded-full bg-forest text-canvas font-body text-sm font-semibold">Aplicar</button>
+      </div>
+    </div>
+  </header>
+
+  <div aria-live="polite">
+    @if (rangeError() || loadError()) {
+      <p role="alert" class="mb-6 rounded-2xl border border-danger/25 bg-danger/5 px-4 py-3 font-body text-sm text-danger">
+        {{ rangeError() ?? loadError() }}
+      </p>
+    }
+  </div>
+
+  <!-- KPIs -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6" aria-label="Indicadores do período">
+    @for (k of kpis(); track k.label) {
+      <article class="kpi kpi-{{ k.tone }} relative overflow-hidden rounded-3xl border border-hairline bg-surface/90 p-5 shadow-soft">
+        <p class="font-body text-sm text-stone">{{ k.label }}</p>
+        <p class="font-display text-[34px] leading-tight text-ink mt-1 tabular-nums">
+          @if (salesLoading()) { <span class="inline-block h-8 w-32 rounded-lg bg-cream animate-pulse align-middle"></span> } @else { {{ k.value }} }
+        </p>
+        @if (!salesLoading()) {
+          @if (k.delta === null) {
+            <p class="font-body text-xs text-stone mt-2">Sem base no período anterior</p>
+          } @else {
+            <p class="font-body text-xs mt-2 flex items-center gap-1.5">
+              <span
+                class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-semibold"
+                [class]="k.delta >= 0 ? 'bg-forest/10 text-forest' : 'bg-danger/10 text-danger'"
+              >
+                <span aria-hidden="true">{{ k.delta >= 0 ? '↑' : '↓' }}</span>
+                {{ k.delta >= 0 ? '+' : '' }}{{ k.delta }}%
+              </span>
+              <span class="text-stone">vs. período anterior</span>
+            </p>
+          }
+        }
+      </article>
+    }
+    <a
+      routerLink="/admin/pedidos"
+      class="relative overflow-hidden rounded-3xl bg-espresso text-canvas p-5 shadow-soft kpi-dark"
+    >
+      <p class="font-body text-sm text-canvas/70">Para enviar agora</p>
+      <p class="font-display text-[34px] leading-tight mt-1 tabular-nums">{{ toShip() }}</p>
+      <p class="font-body text-xs mt-2 text-gold-pale">
+        @if (refunds() > 0) { {{ refunds() }} com estorno pedido · } Ver pedidos →
+      </p>
+    </a>
+  </section>
+
+  <!-- Vendas no tempo -->
+  <section class="rounded-3xl border border-hairline bg-surface/90 backdrop-blur p-5 sm:p-6 shadow-soft mb-6" aria-labelledby="g-vendas">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+      <div>
+        <h2 id="g-vendas" class="font-display text-2xl text-ink">{{ metric() === 'revenue' ? 'Receita por dia' : 'Pedidos pagos por dia' }}</h2>
+        <p class="font-body text-sm text-stone tabular-nums">{{ startDate() | date: 'dd/MM/yyyy' }} a {{ endDate() | date: 'dd/MM/yyyy' }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="inline-flex p-1 rounded-full bg-cream/80 border border-hairline" role="group" aria-label="Medida">
+          <button type="button" (click)="metric.set('revenue')" [attr.aria-pressed]="metric() === 'revenue'"
+                  [class]="'font-body text-sm font-semibold h-9 px-4 rounded-full ' + (metric() === 'revenue' ? 'bg-ink text-canvas' : 'text-stone hover:text-ink')">Receita</button>
+          <button type="button" (click)="metric.set('orders')" [attr.aria-pressed]="metric() === 'orders'"
+                  [class]="'font-body text-sm font-semibold h-9 px-4 rounded-full ' + (metric() === 'orders' ? 'bg-ink text-canvas' : 'text-stone hover:text-ink')">Pedidos</button>
+        </div>
+        <div class="inline-flex p-1 rounded-full bg-cream/80 border border-hairline" role="group" aria-label="Tipo de gráfico">
+          @for (t of salesTypes; track t.value) {
+            <button type="button" (click)="salesChartType.set(t.value)" [attr.aria-pressed]="salesChartType() === t.value"
+                    [class]="'font-body text-sm font-semibold h-9 px-4 rounded-full ' + (salesChartType() === t.value ? 'bg-ink text-canvas' : 'text-stone hover:text-ink')">{{ t.label }}</button>
+          }
+        </div>
+        <button type="button" (click)="toggleTable('vendas')" [attr.aria-pressed]="!!tableView()['vendas']"
+                class="h-11 px-4 rounded-full border border-hairline font-body text-sm font-medium text-stone hover:text-ink hover:border-ink">
+          {{ tableView()['vendas'] ? 'Ver gráfico' : 'Ver tabela' }}
+        </button>
+      </div>
+    </div>
+
+    @if (salesLoading()) {
+      <div class="h-[280px] rounded-2xl bg-cream/60 animate-pulse"></div>
+    } @else {
+      <app-chart
+        [data]="salesData()"
+        [type]="salesChartType()"
+        [format]="salesFormat()"
+        [color]="salesColor()"
+        [height]="280"
+        [showTable]="!!tableView()['vendas']"
+        [ariaLabel]="metric() === 'revenue' ? 'Receita por dia no período' : 'Pedidos pagos por dia no período'"
+      />
+    }
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Pedidos por status -->
+    <section class="rounded-3xl border border-hairline bg-surface/90 backdrop-blur p-5 sm:p-6 shadow-soft" aria-labelledby="g-status">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 id="g-status" class="font-display text-2xl text-ink">Pedidos por situação</h2>
+          <p class="font-body text-sm text-stone">Todos os pedidos, fora carrinhos abertos</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="inline-flex p-1 rounded-full bg-cream/80 border border-hairline" role="group" aria-label="Tipo de gráfico">
+            @for (t of statusTypes; track t.value) {
+              <button type="button" (click)="statusChartType.set(t.value)" [attr.aria-pressed]="statusChartType() === t.value"
+                      [class]="'font-body text-sm font-semibold h-9 px-4 rounded-full ' + (statusChartType() === t.value ? 'bg-ink text-canvas' : 'text-stone hover:text-ink')">{{ t.label }}</button>
+            }
+          </div>
+          <button type="button" (click)="toggleTable('status')" [attr.aria-pressed]="!!tableView()['status']"
+                  class="h-11 px-4 rounded-full border border-hairline font-body text-sm font-medium text-stone hover:text-ink hover:border-ink">
+            {{ tableView()['status'] ? 'Gráfico' : 'Tabela' }}
+          </button>
+        </div>
+      </div>
+      <app-chart [data]="statusData()" [type]="statusChartType()" [format]="intFormat"
+                 [showTable]="!!tableView()['status']" ariaLabel="Pedidos por situação" />
+    </section>
+
+    <!-- Mais vendidas -->
+    <section class="rounded-3xl border border-hairline bg-surface/90 backdrop-blur p-5 sm:p-6 shadow-soft" aria-labelledby="g-top">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 id="g-top" class="font-display text-2xl text-ink">Peças mais vendidas</h2>
+          <p class="font-body text-sm text-stone">Unidades vendidas desde o início</p>
+        </div>
+        <div class="inline-flex p-1 rounded-full bg-cream/80 border border-hairline" role="group" aria-label="Quantidade de peças">
+          @for (n of [5, 10]; track n) {
+            <button type="button" (click)="topLimit.set(n)" [attr.aria-pressed]="topLimit() === n"
+                    [class]="'font-body text-sm font-semibold h-9 px-4 rounded-full ' + (topLimit() === n ? 'bg-ink text-canvas' : 'text-stone hover:text-ink')">Top {{ n }}</button>
+          }
+        </div>
+      </div>
+      <app-chart [data]="topData()" type="hbar" [format]="unitFormat" ariaLabel="Peças mais vendidas" />
+    </section>
+  </div>
+
+  <!-- Fila de envio -->
+  <section class="rounded-3xl border border-hairline bg-surface/90 backdrop-blur shadow-soft overflow-hidden" aria-labelledby="t-envio">
+    <div class="flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 sm:pt-6 pb-4">
+      <div>
+        <h2 id="t-envio" class="font-display text-2xl text-ink">Fila de envio</h2>
+        <p class="font-body text-sm text-stone">{{ pendingTotal() }} {{ pendingTotal() === 1 ? 'pedido pago espera' : 'pedidos pagos esperam' }} postagem</p>
+      </div>
+      <a routerLink="/admin/pedidos" class="h-11 px-4 rounded-full border border-hairline font-body text-sm font-medium text-ink hover:border-ink inline-flex items-center">Todos os pedidos</a>
+    </div>
+
+    @if (pendingOrders().length === 0) {
+      <p class="font-body text-stone px-6 pb-6">Nenhum pedido esperando envio. Tudo em dia.</p>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[560px] font-body text-sm">
+          <thead class="bg-cream/60">
+            <tr class="text-left text-[11px] uppercase tracking-[0.12em] text-stone">
+              <th scope="col" class="px-6 py-3 font-semibold">Destinatário</th>
+              <th scope="col" class="px-6 py-3 font-semibold">Destino</th>
+              <th scope="col" class="px-6 py-3 font-semibold">Criado em</th>
+              <th scope="col" class="px-6 py-3 font-semibold text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of pendingOrders(); track order.id) {
+              <tr class="border-t border-hairline hover:bg-cream/40 transition-colors">
+                <td class="px-6 py-3.5">
+                  <a [routerLink]="['/admin/pedidos', order.id]" class="text-ink font-medium hover:text-forest underline-offset-4 hover:underline">{{ order.recipientName }}</a>
+                </td>
+                <td class="px-6 py-3.5 text-stone">{{ order.shippingCity }}/{{ order.shippingState }}</td>
+                <td class="px-6 py-3.5 text-stone tabular-nums">{{ order.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="px-6 py-3.5 text-right font-semibold text-ink tabular-nums">{{ order.totalAmount | currency: 'BRL' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (pendingTotalPages() > 1) {
+        <div class="flex items-center justify-between gap-4 border-t border-hairline px-6 py-3">
+          <span class="font-body text-sm text-stone tabular-nums">Página {{ pendingPage() + 1 }} de {{ pendingTotalPages() }}</span>
+          <div class="flex gap-2">
+            <button type="button" (click)="goToPendingPage(-1)" [disabled]="pendingPage() === 0"
+                    class="h-10 px-4 rounded-full border border-hairline bg-surface text-sm font-medium text-ink hover:border-ink disabled:opacity-30">Anterior</button>
+            <button type="button" (click)="goToPendingPage(1)" [disabled]="pendingPage() + 1 >= pendingTotalPages()"
+                    class="h-10 px-4 rounded-full border border-hairline bg-surface text-sm font-medium text-ink hover:border-ink disabled:opacity-30">Próxima</button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+</main>

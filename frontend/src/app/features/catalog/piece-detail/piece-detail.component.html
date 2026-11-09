@@ -1,0 +1,104 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/catalogo" label="Voltar ao catálogo" />
+
+    @if (loading()) {
+      <p class="font-body text-sm text-ink/60">Carregando…</p>
+    } @else if (notFound() || !piece()) {
+      <p class="font-body text-sm text-clay">Peça não encontrada.</p>
+    } @else {
+      @let p = piece()!;
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div class="relative rounded-3xl overflow-hidden border border-hairline h-80 md:h-[28rem]">
+          @if (p.imageUrls.length > 0) {
+            <img [src]="p.imageUrls[0]" [alt]="p.name" width="800" height="800" fetchpriority="high" class="w-full h-full object-cover" />
+          } @else {
+            <div class="w-full h-full flex items-center justify-center liquid-fill">
+              </div>
+          }
+          @if (!p.inStock) {
+            <span
+              class="absolute top-4 right-4 font-body text-sm font-semibold uppercase tracking-wide bg-ink/90 text-canvas px-3.5 py-2 rounded-xl"
+            >
+              Esgotado
+            </span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-4">
+          @if (p.categories.length > 0) {
+            <div class="flex flex-wrap gap-2">
+              @for (category of p.categories; track category.id) {
+                <span class="font-body text-sm font-semibold uppercase tracking-wide bg-gold text-ink px-3 py-1.5 rounded-xl">
+                  {{ category.name }}
+                </span>
+              }
+            </div>
+          }
+
+          <h1 class="font-display text-5xl text-ink">{{ p.name }}</h1>
+
+          <p class="font-body font-semibold text-2xl text-ink">{{ p.price | currency: 'BRL' }}</p>
+
+          @if (p.description) {
+            <p class="font-body text-lg text-ink/80 leading-relaxed max-w-md">{{ p.description }}</p>
+          }
+
+          <p [class]="'font-body text-sm font-semibold uppercase tracking-wide ' + (p.inStock ? 'text-ink/60' : 'text-clay')">
+            {{ p.inStock ? p.stock + ' em estoque' : 'Sem estoque no momento' }}
+          </p>
+
+          @if (addToCartError()) {
+            <p role="alert" class="font-body text-xs text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2">
+              {{ addToCartError() }}
+            </p>
+          }
+
+          @if (p.inStock) {
+            @if (isAuthenticated()) {
+              <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-2">
+                <div class="flex items-center border border-hairline rounded-xl overflow-hidden w-fit">
+                  <button
+                    type="button"
+                    (click)="decrementQuantity()"
+                    [disabled]="quantity() <= 1"
+                    class="w-11 h-11 flex items-center justify-center font-body text-ink hover:bg-canvas transition-colors disabled:opacity-30"
+                  >
+                    −
+                  </button>
+                  <span class="w-10 text-center font-body text-base text-ink">{{ quantity() }}</span>
+                  <button
+                    type="button"
+                    (click)="incrementQuantity()"
+                    [disabled]="quantity() >= p.stock"
+                    class="w-11 h-11 flex items-center justify-center font-body text-ink hover:bg-canvas transition-colors disabled:opacity-30"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  (click)="addToCart(p.id)"
+                  [disabled]="addingToCart()"
+                  class="btn font-body font-semibold text-base px-7 py-3.5 rounded-full border border-ink bg-forest text-canvas  transition duration-300 active:scale-[0.97] active:duration-75 disabled:opacity-60"
+                >
+                  {{ justAdded() ? 'Adicionado ✓' : addingToCart() ? 'Adicionando…' : 'Adicionar ao carrinho' }}
+                </button>
+              </div>
+            } @else {
+              <a
+                routerLink="/login"
+                class="inline-block w-fit font-body text-xs uppercase tracking-wide text-clay border border-clay rounded-full px-4 py-2.5 hover:bg-clay hover:text-canvas transition-colors mt-2"
+              >
+                Entrar para comprar
+              </a>
+            }
+          }
+        </div>
+      </div>
+    }
+  </main>
+</div>

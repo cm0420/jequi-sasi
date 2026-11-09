@@ -1,0 +1,251 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+    <header class="pt-10 sm:pt-14 pb-8">
+      <p class="font-body text-xs font-semibold uppercase tracking-[0.16em] text-clay mb-3">Jequí</p>
+      <h1 class="font-display text-ink text-4xl sm:text-6xl">Todo o catálogo</h1>
+    </header>
+
+    <div class="inline-flex p-1 mb-8 rounded-full bg-cream/80 border border-hairline" role="tablist" aria-label="Tipo de produto">
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="view() === 'pecas'"
+        (click)="switchView('pecas')"
+        [class]="'font-body text-sm font-semibold h-11 px-6 rounded-full ' + (view() === 'pecas' ? 'bg-ink text-canvas shadow-soft' : 'text-stone hover:text-ink')"
+      >
+        Peças
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="view() === 'conjuntos'"
+        (click)="switchView('conjuntos')"
+        [class]="'font-body text-sm font-semibold h-11 px-6 rounded-full ' + (view() === 'conjuntos' ? 'bg-ink text-canvas shadow-soft' : 'text-stone hover:text-ink')"
+      >
+        Conjuntos
+      </button>
+    </div>
+
+    @if (view() === 'pecas') {
+    <div class="relative max-w-md mb-8 group">
+      <svg
+        class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40 transition-colors duration-200 group-focus-within:text-forest"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="M21,21 L16.65,16.65" />
+      </svg>
+      <input
+        type="search"
+        aria-label="Buscar peça pelo nome"
+        [value]="searchQuery()"
+        (input)="onSearchInput($any($event.target).value)"
+        placeholder="Buscar peça pelo nome…"
+        class="w-full bg-surface font-body text-ink placeholder:text-ink/40 border border-hairline rounded-full pl-10 pr-10 h-12 shadow-soft transition duration-200 focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10 focus:shadow-[0_0_0_3px_rgba(34,66,40,0.12)]"
+      />
+      @if (isSearching()) {
+        <button
+          type="button"
+          (click)="clearSearch()"
+          aria-label="Limpar busca"
+          class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center h-5 w-5 rounded-full text-ink/40 transition-colors duration-150 hover:text-canvas hover:bg-clay"
+        >
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5,5 L19,19 M19,5 L5,19" />
+          </svg>
+        </button>
+      }
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-8">
+      <button
+        type="button"
+        (click)="selectCategory(null)"
+        class="font-body font-medium text-sm h-11 px-5 rounded-full border"
+        [class.bg-ink]="selectedCategoryId() === null"
+        [class.text-canvas]="selectedCategoryId() === null"
+        [class.border-ink]="selectedCategoryId() === null"
+        [class.border-hairline]="selectedCategoryId() !== null"
+        [class.text-ink]="selectedCategoryId() !== null"
+      >
+        Todas
+      </button>
+      @for (category of categories(); track category.id) {
+        <button
+          type="button"
+          (click)="selectCategory(category.id)"
+          class="font-body font-medium text-sm h-11 px-5 rounded-full border"
+          [class.bg-ink]="selectedCategoryId() === category.id"
+          [class.text-canvas]="selectedCategoryId() === category.id"
+          [class.border-ink]="selectedCategoryId() === category.id"
+          [class.border-hairline]="selectedCategoryId() !== category.id"
+          [class.text-ink]="selectedCategoryId() !== category.id"
+        >
+          {{ category.name }}
+        </button>
+      }
+    </div>
+
+    @if (!loading() && displayedPieces().length > 0) {
+      <div class="flex items-center justify-between gap-4 mb-6">
+        <p class="font-body text-sm text-ink/60" aria-live="polite">
+          {{ displayedPieces().length }} {{ displayedPieces().length === 1 ? 'peça' : 'peças' }}
+        </p>
+        <label class="flex items-center gap-2 font-body text-sm text-ink/70">
+          <span class="whitespace-nowrap">Ordenar por</span>
+          <select
+            aria-label="Ordenar peças"
+            [value]="sortBy()"
+            (change)="setSort($any($event.target).value)"
+            class="font-body text-sm font-medium text-ink bg-surface border border-hairline rounded-full h-11 pl-4 pr-9 shadow-soft transition-colors hover:border-forest focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+          >
+            <option value="relevancia">Relevância</option>
+            <option value="preco-asc">Menor preço</option>
+            <option value="preco-desc">Maior preço</option>
+            <option value="nome">Nome (A–Z)</option>
+          </select>
+        </label>
+      </div>
+    }
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else if (displayedPieces().length === 0) {
+      <p class="font-body text-base text-ink/60">
+        {{ isSearching() ? 'Nenhuma peça encontrada pra essa busca.' : 'Nenhuma peça encontrada nessa categoria.' }}
+      </p>
+    } @else {
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        @for (piece of displayedPieces(); track piece.id) {
+          <a
+            [routerLink]="['/pecas', piece.id]"
+            class="group bg-surface border border-hairline rounded-3xl overflow-hidden flex flex-col transition duration-300 ease-out hover:border-forest"
+          >
+            <div class="h-40 flex items-center justify-center relative overflow-hidden">
+              @if (piece.imageUrls.length > 0) {
+                <img
+                  [src]="piece.imageUrls[0]"
+                  width="400"
+                  height="320"
+                  loading="lazy"
+                  [alt]="piece.name"
+                  class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                />
+              } @else {
+                <div
+                  class="w-full h-full flex items-center justify-center transition-transform duration-500 ease-out group-hover:scale-[1.03] liquid-fill"
+                >
+                </div>
+              }
+              @if (!piece.inStock) {
+                <span
+                  class="absolute top-2 right-2 font-body text-xs font-semibold uppercase tracking-wide bg-ink/90 text-canvas px-2.5 py-1.5 rounded-xl"
+                >
+                  Esgotado
+                </span>
+              }
+            </div>
+            <div class="p-4 flex flex-col gap-1">
+              @if (piece.categories.length > 0) {
+                <span class="font-body text-xs font-semibold uppercase tracking-wide text-clay">{{ piece.categories[0].name }}</span>
+              }
+              <h3 class="font-display text-2xl text-ink transition-colors duration-200 group-hover:text-forest">
+                {{ piece.name }}
+              </h3>
+              <span class="font-body font-bold text-ink text-base">{{ piece.price | currency: 'BRL' }}</span>
+            </div>
+          </a>
+        }
+      </div>
+
+      @if (!isSearching()) {
+        <div class="flex items-center justify-center gap-4 mt-10">
+          <button
+            type="button"
+            (click)="goToPage(-1)"
+            [disabled]="!hasPrev()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Anterior
+          </button>
+          <span class="font-body text-sm text-ink/70">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="goToPage(1)"
+            [disabled]="!hasNext()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Próxima
+          </button>
+        </div>
+      }
+    }
+    }
+
+    @if (view() === 'conjuntos') {
+      @if (setsLoading()) {
+        <p class="font-body text-base text-ink/60">Carregando…</p>
+      } @else if (sets().length === 0) {
+        <p class="font-body text-base text-ink/60">Nenhum conjunto disponível no momento.</p>
+      } @else {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          @for (set of sets(); track set.id) {
+            <a
+              [routerLink]="['/conjuntos', set.id]"
+              class="group bg-surface border border-hairline rounded-3xl overflow-hidden flex flex-col transition duration-300 ease-out hover:border-forest"
+            >
+              <div class="h-40 flex items-center justify-center relative overflow-hidden">
+                <div
+                  class="w-full h-full flex items-center justify-center transition-transform duration-500 ease-out group-hover:scale-[1.03] liquid-fill-warm"
+                >
+                  <span class="font-body text-[11px] text-white/70">{{ set.pieces.length }} peças</span>
+                </div>
+                @if (set.availableStock === 0) {
+                  <span
+                    class="absolute top-2 right-2 font-body text-xs font-semibold uppercase tracking-wide bg-ink/90 text-canvas px-2.5 py-1.5 rounded-xl"
+                  >
+                    Esgotado
+                  </span>
+                }
+              </div>
+              <div class="p-4 flex flex-col gap-1">
+                <span class="font-body text-xs font-semibold uppercase tracking-wide text-clay">Conjunto</span>
+                <h3 class="font-display text-2xl text-ink transition-colors duration-200 group-hover:text-forest">
+                  {{ set.name }}
+                </h3>
+                <span class="font-body font-bold text-ink text-base">{{ set.price | currency: 'BRL' }}</span>
+              </div>
+            </a>
+          }
+        </div>
+
+        @if (setsTotalPages() > 1) {
+          <div class="flex items-center justify-center gap-4 mt-10">
+            <button
+              type="button"
+              (click)="goToSetsPage(-1)"
+              [disabled]="!setsHasPrev()"
+              class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+            >
+              Anterior
+            </button>
+            <span class="font-body text-sm text-ink/70">Página {{ setsPage() + 1 }} de {{ setsTotalPages() }}</span>
+            <button
+              type="button"
+              (click)="goToSetsPage(1)"
+              [disabled]="!setsHasNext()"
+              class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+            >
+              Próxima
+            </button>
+          </div>
+        }
+      }
+    }
+  </main>
+</div>

@@ -1,0 +1,200 @@
+<main id="conteudo" class="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-10">
+  <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+    <div>
+      <p class="font-body text-xs font-semibold uppercase tracking-[0.16em] text-clay mb-2">Pessoas</p>
+      <h1 class="font-display text-4xl sm:text-5xl text-ink">Usuários</h1>
+      <p class="font-body text-stone mt-2">
+        {{ totalElements() }} {{ totalElements() === 1 ? 'conta ativa' : 'contas ativas' }}
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="openDrawer()"
+      class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-forest text-canvas font-body font-semibold"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12,5 V19 M5,12 H19" />
+      </svg>
+      Novo usuário
+    </button>
+  </header>
+
+  <div aria-live="polite">
+    @if (notice()) {
+      <p class="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-forest/20 bg-sage-pale/50 px-4 py-3 font-body text-sm text-forest">
+        {{ notice() }}
+        <button type="button" (click)="notice.set(null)" class="text-forest/70 hover:text-forest" aria-label="Fechar aviso">✕</button>
+      </p>
+    }
+    @if (errorMessage()) {
+      <p role="alert" class="mb-4 rounded-2xl border border-danger/25 bg-danger/5 px-4 py-3 font-body text-sm text-danger">
+        {{ errorMessage() }}
+      </p>
+    }
+  </div>
+
+  <div class="inline-flex p-1 mb-6 rounded-full bg-cream/80 border border-hairline" role="group" aria-label="Filtrar por papel">
+    @for (f of filters; track f.label) {
+      <button
+        type="button"
+        (click)="setFilter(f.value)"
+        [attr.aria-pressed]="roleFilter() === f.value"
+        [class]="'font-body text-sm font-semibold h-10 px-4 sm:px-5 rounded-full ' + (roleFilter() === f.value ? 'bg-ink text-canvas shadow-soft' : 'text-stone hover:text-ink')"
+      >
+        {{ f.label }}
+      </button>
+    }
+  </div>
+
+  <section class="bg-surface/90 backdrop-blur border border-hairline rounded-3xl overflow-hidden shadow-soft" aria-label="Lista de usuários">
+    @if (loading()) {
+      <p class="font-body text-stone p-8">Carregando…</p>
+    } @else if (users().length === 0) {
+      <p class="font-body text-stone p-8">Nenhum usuário nesse filtro.</p>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[640px] font-body text-sm">
+          <thead class="bg-cream/60">
+            <tr class="text-left text-[11px] uppercase tracking-[0.12em] text-stone">
+              <th scope="col" class="px-5 py-3 font-semibold">Usuário</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Papel</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Criado em</th>
+              <th scope="col" class="px-5 py-3 font-semibold text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users(); track u.id) {
+              <tr class="border-t border-hairline hover:bg-cream/40 transition-colors">
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <span
+                      class="h-9 w-9 shrink-0 rounded-full flex items-center justify-center font-semibold uppercase"
+                      [class]="u.role === 'ADMIN' ? 'bg-espresso text-gold-pale' : 'bg-sage-pale text-forest'"
+                      aria-hidden="true"
+                    >{{ u.email.charAt(0) }}</span>
+                    <span class="truncate text-ink" [title]="u.email">{{ u.email }}</span>
+                    @if (u.id === currentUserId()) {
+                      <span class="shrink-0 rounded-full bg-gold/15 px-2 py-0.5 text-[11px] font-semibold text-gold">você</span>
+                    }
+                  </div>
+                </td>
+                <td class="px-5 py-3.5">
+                  @if (u.id === currentUserId()) {
+                    <span class="inline-flex rounded-full bg-espresso text-canvas px-3 py-1 text-xs font-semibold">Administrador</span>
+                  } @else {
+                    <label class="sr-only" [attr.for]="'role-' + u.id">Papel de {{ u.email }}</label>
+                    <select
+                      [id]="'role-' + u.id"
+                      [value]="u.role"
+                      [disabled]="busyId() === u.id"
+                      (change)="changeRole(u, $any($event.target).value)"
+                      class="h-10 rounded-full border border-hairline bg-surface px-3 pr-8 text-sm text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+                    >
+                      <option value="ADMIN">Administrador</option>
+                      <option value="CLIENTE">Cliente</option>
+                    </select>
+                  }
+                </td>
+                <td class="px-5 py-3.5 text-stone tabular-nums">{{ u.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="px-5 py-3.5 text-right">
+                  @if (u.id !== currentUserId()) {
+                    <button
+                      type="button"
+                      (click)="remove(u)"
+                      [disabled]="busyId() === u.id"
+                      class="h-10 px-4 rounded-full border border-hairline text-sm font-medium text-danger hover:bg-danger hover:text-canvas hover:border-danger disabled:opacity-40"
+                      [attr.aria-label]="'Excluir ' + u.email"
+                    >
+                      Excluir
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between gap-4 border-t border-hairline px-5 py-3">
+          <span class="font-body text-sm text-stone tabular-nums">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <div class="flex gap-2">
+            <button type="button" (click)="goToPage(-1)" [disabled]="!hasPrev()"
+                    class="h-10 px-4 rounded-full border border-hairline bg-surface text-sm font-medium text-ink hover:border-ink disabled:opacity-30">Anterior</button>
+            <button type="button" (click)="goToPage(1)" [disabled]="!hasNext()"
+                    class="h-10 px-4 rounded-full border border-hairline bg-surface text-sm font-medium text-ink hover:border-ink disabled:opacity-30">Próxima</button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+</main>
+
+@if (drawerOpen()) {
+  <div class="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm drawer-fade" (click)="closeDrawer()" aria-hidden="true"></div>
+  <aside
+    class="fixed inset-y-0 right-0 z-[70] w-full max-w-md bg-canvas shadow-lift flex flex-col overscroll-contain drawer-slide"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="novo-usuario-titulo"
+    (keydown.escape)="closeDrawer()"
+  >
+    <div class="flex items-center justify-between px-6 h-20 border-b border-hairline">
+      <h2 id="novo-usuario-titulo" class="font-display text-3xl text-ink">Novo usuário</h2>
+      <button type="button" (click)="closeDrawer()" class="h-11 w-11 rounded-full flex items-center justify-center text-stone hover:bg-ink/5 hover:text-ink" aria-label="Fechar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6,6 L18,18 M18,6 L6,18" /></svg>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="create()" class="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-5" novalidate>
+      @if (formError()) {
+        <p role="alert" class="rounded-2xl border border-danger/25 bg-danger/5 px-4 py-3 font-body text-sm text-danger">{{ formError() }}</p>
+      }
+
+      <div class="flex flex-col gap-1.5">
+        <label for="nu-email" class="font-body text-[11px] font-semibold tracking-[0.12em] uppercase text-stone">E-mail</label>
+        <input id="nu-email" type="email" formControlName="email" autocomplete="off" spellcheck="false" placeholder="nome@exemplo.com…"
+               class="font-body h-12 rounded-xl border border-hairline bg-surface px-4 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10" />
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+          <span class="font-body text-xs text-danger">Informe um e-mail válido.</span>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="nu-senha" class="font-body text-[11px] font-semibold tracking-[0.12em] uppercase text-stone">Senha inicial</label>
+        <input id="nu-senha" type="password" formControlName="password" autocomplete="new-password"
+               class="font-body h-12 rounded-xl border border-hairline bg-surface px-4 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10" />
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <span class="font-body text-xs text-danger">A senha precisa ter de 8 a 64 caracteres.</span>
+        } @else {
+          <span class="font-body text-xs text-stone">Passe a senha para a pessoa por um canal seguro e peça para trocá-la no primeiro acesso.</span>
+        }
+      </div>
+
+      <fieldset class="flex flex-col gap-2">
+        <legend class="font-body text-[11px] font-semibold tracking-[0.12em] uppercase text-stone mb-1.5">Papel</legend>
+        <label class="flex items-start gap-3 rounded-2xl border border-hairline bg-surface p-4 cursor-pointer has-[:checked]:border-forest has-[:checked]:bg-sage-pale/30">
+          <input type="radio" formControlName="role" value="ADMIN" class="mt-1 accent-forest" />
+          <span>
+            <span class="block font-body font-semibold text-ink">Administrador</span>
+            <span class="block font-body text-sm text-stone">Acesso total ao painel: pedidos, catálogo e usuários.</span>
+          </span>
+        </label>
+        <label class="flex items-start gap-3 rounded-2xl border border-hairline bg-surface p-4 cursor-pointer has-[:checked]:border-forest has-[:checked]:bg-sage-pale/30">
+          <input type="radio" formControlName="role" value="CLIENTE" class="mt-1 accent-forest" />
+          <span>
+            <span class="block font-body font-semibold text-ink">Cliente</span>
+            <span class="block font-body text-sm text-stone">Entra sem perfil de compra (nome, CPF). Para comprar, o melhor é a pessoa se cadastrar pela loja.</span>
+          </span>
+        </label>
+      </fieldset>
+
+      <div class="mt-auto flex gap-3 pt-4">
+        <button type="button" (click)="closeDrawer()" class="flex-1 h-12 rounded-full border border-hairline bg-surface font-body font-semibold text-ink hover:border-ink">Cancelar</button>
+        <button type="submit" [disabled]="saving()" class="flex-1 h-12 rounded-full bg-forest text-canvas font-body font-semibold disabled:opacity-60">
+          {{ saving() ? 'Criando…' : 'Criar usuário' }}
+        </button>
+      </div>
+    </form>
+  </aside>
+}

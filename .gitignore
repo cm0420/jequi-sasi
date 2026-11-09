@@ -1,0 +1,26 @@
+# --- Java / Maven ---
+backend/target/
+*.class
+
+# --- Node / Angular ---
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# --- Certificados e chaves gerados por certs/generate-certs.sh (NUNCA versionar) ---
+certs/*.key
+certs/*.crt
+certs/*.csr
+certs/*.p12
+certs/*.srl
+
+# --- Variáveis de ambiente e logs ---
+.env
+.env.local
+*.log
+
+# --- IDE / SO ---
+.idea/
+.vscode/
+*.iml
+.DS_Store

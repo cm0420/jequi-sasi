@@ -1,0 +1,133 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/pedidos" label="Meus pedidos" />
+
+    @if (loading()) {
+      <p class="font-body text-sm text-ink/60">Carregando…</p>
+    } @else if (notFound() || !order()) {
+      <p class="font-body text-sm text-clay">Pedido não encontrado.</p>
+    } @else {
+      @let o = order()!;
+
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="font-display text-4xl text-ink">Pedido</h1>
+        <span class="font-body text-xs uppercase tracking-wide bg-ink text-canvas px-3 py-1.5 rounded-xl">
+          {{ statusLabel[o.status] }}
+        </span>
+      </div>
+
+      @if (errorMessage()) {
+        <p role="alert" class="font-body text-xs text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-4 mb-6">
+        <h2 class="font-body text-xs uppercase tracking-wide text-ink/50">Itens</h2>
+        @for (item of o.items; track item.id) {
+          <div class="flex items-center justify-between font-body">
+            <span class="text-ink">{{ item.quantity }}x {{ item.itemName }}</span>
+            <span class="text-ink/70">{{ item.subtotal | currency: 'BRL' }}</span>
+          </div>
+        }
+        @if (o.shippingOptionName) {
+          <div class="flex items-center justify-between font-body pt-2 border-t border-hairline">
+            <span class="text-ink">Frete — {{ o.shippingOptionName }}</span>
+            <span class="text-ink/70">{{ o.shippingCost | currency: 'BRL' }}</span>
+          </div>
+        }
+        <div class="flex items-center justify-between pt-2 border-t border-hairline">
+          <span class="font-body text-sm uppercase tracking-wide text-ink/70">Total</span>
+          <span class="font-body font-semibold text-xl text-ink">{{ o.totalAmount | currency: 'BRL' }}</span>
+        </div>
+      </div>
+
+      @if (o.recipientName) {
+        <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-1 mb-6">
+          <h2 class="font-body text-xs uppercase tracking-wide text-ink/50 mb-2">Entrega</h2>
+          <p class="font-body text-ink">{{ o.recipientName }}</p>
+          <p class="font-body text-sm text-ink/60">{{ o.shippingCity }}/{{ o.shippingState }}</p>
+          @if (o.estimatedDeliveryDays) {
+            <p class="font-body text-xs text-ink/50 mt-1">até {{ o.estimatedDeliveryDays }} dias úteis</p>
+          }
+          @if (o.trackingCode) {
+            <p class="font-body text-xs text-ink/50">Rastreio: {{ o.trackingCode }}</p>
+          }
+        </div>
+      }
+
+      @if (o.refundReason) {
+        <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-1 mb-6">
+          <h2 class="font-body text-xs uppercase tracking-wide text-ink/50 mb-2">Estorno</h2>
+          <p class="font-body text-sm text-ink/70">Motivo: {{ o.refundReason }}</p>
+          @if (o.refundRequestedAt) {
+            <p class="font-body text-xs text-ink/50">Solicitado em {{ o.refundRequestedAt | date: 'dd/MM/yyyy' }}</p>
+          }
+        </div>
+      }
+
+      <p class="font-body text-xs text-ink/40 mb-6">
+        Feito em {{ o.createdAt | date: "dd/MM/yyyy 'às' HH:mm" }}
+      </p>
+
+      @if (canCancel()) {
+        <button
+          type="button"
+          (click)="cancelOrder()"
+          [disabled]="submitting()"
+          class="font-body text-sm uppercase tracking-wide text-clay border border-clay rounded-full px-5 py-3 hover:bg-clay hover:text-canvas transition-colors disabled:opacity-60"
+        >
+          {{ submitting() ? 'Cancelando…' : 'Cancelar pedido' }}
+        </button>
+      }
+
+      @if (canRequestRefund()) {
+        @if (!showRefundForm()) {
+          <button
+            type="button"
+            (click)="toggleRefundForm()"
+            class="font-body text-sm uppercase tracking-wide text-clay border border-clay rounded-full px-5 py-3 hover:bg-clay hover:text-canvas transition-colors"
+          >
+            Solicitar estorno
+          </button>
+        } @else {
+          <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-3">
+            <label for="f-campo-1" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Motivo do estorno</label>
+            <textarea id="f-campo-1"
+              [value]="refundReason()"
+              (input)="refundReason.set($any($event.target).value)"
+              rows="3"
+              class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10 resize-none"
+            ></textarea>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                (click)="toggleRefundForm()"
+                class="font-body text-xs uppercase tracking-wide text-ink/60 border border-hairline rounded-full px-5 py-3"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                (click)="submitRefundRequest()"
+                [disabled]="submitting() || refundReason().trim().length === 0"
+                class="flex-1 font-body text-xs uppercase tracking-wide text-canvas bg-clay rounded-full px-5 py-3 disabled:opacity-60"
+              >
+                {{ submitting() ? 'Enviando…' : 'Enviar solicitação' }}
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      @if (actionDone() === 'cancelled') {
+        <p class="font-body text-xs text-ink/60 mt-3">Pedido cancelado.</p>
+      }
+      @if (actionDone() === 'refund-requested') {
+        <p class="font-body text-xs text-ink/60 mt-3">Estorno solicitado — aguardando análise.</p>
+      }
+    }
+  </main>
+</div>

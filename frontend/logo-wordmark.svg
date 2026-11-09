@@ -1,0 +1,23 @@
+<svg width="420" height="100" viewBox="0 0 420 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="wordmarkTitle">
+  <title id="wordmarkTitle">Tadeu Costa</title>
+
+  <text
+    x="0"
+    y="52"
+    font-family="'Fraunces', Georgia, 'Times New Roman', serif"
+    font-style="italic"
+    font-weight="500"
+    font-size="46"
+    fill="#2B2622"
+  >Tadeu Costa</text>
+
+  <text
+    x="2"
+    y="80"
+    font-family="'Work Sans', Arial, sans-serif"
+    font-weight="500"
+    font-size="14"
+    letter-spacing="4"
+    fill="#B54A34"
+  >ARTESANATOS</text>
+</svg>

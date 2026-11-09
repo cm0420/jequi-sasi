@@ -1,0 +1,194 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/carrinho" label="Carrinho" />
+
+    <h1 class="font-display text-4xl text-ink mb-2">Finalizar compra</h1>
+
+    @if (step() !== 'result') {
+      <div class="flex items-center gap-2 mb-8 font-body text-[11px] uppercase tracking-wide text-ink/50">
+        <span [class.text-forest]="step() === 'address'">1. Endereço</span>
+        <span>→</span>
+        <span [class.text-forest]="step() === 'shipping'">2. Frete</span>
+        <span>→</span>
+        <span [class.text-forest]="step() === 'payment'">3. Pagamento</span>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <p role="alert" class="font-body text-xs text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (loading()) {
+      <p class="font-body text-sm text-ink/60">Carregando…</p>
+    } @else if (order() && order()!.items.length === 0 && step() === 'address') {
+      <div class="bg-surface border border-hairline rounded-3xl p-10 text-center flex flex-col items-center gap-4">
+        <p class="font-body text-lg text-ink/70">Seu carrinho está vazio.</p>
+        <a
+          routerLink="/"
+          class="font-body text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 transition-shadow"
+        >
+          Ver catálogo
+        </a>
+      </div>
+    } @else {
+      @switch (step()) {
+        @case ('address') {
+          <div class="flex flex-col gap-4">
+            @if (addresses().length > 0 && !showNewAddressForm()) {
+              <div class="flex flex-col gap-3">
+                @for (address of addresses(); track address.id) {
+                  <button
+                    type="button"
+                    (click)="selectedAddressId.set(address.id)"
+                    class="text-left bg-surface border rounded-3xl p-4 transition-colors"
+                    [class.border-forest]="selectedAddressId() === address.id"
+                    [class.border-hairline]="selectedAddressId() !== address.id"
+                  >
+                    <p class="font-body text-[10px] uppercase tracking-wide text-clay">{{ address.label }}</p>
+                    <p class="font-body text-ink">{{ address.recipientName }}</p>
+                    <p class="font-body text-sm text-ink/60">
+                      {{ address.street }}, {{ address.number }} — {{ address.neighborhood }}, {{ address.city }}/{{ address.state }}
+                    </p>
+                  </button>
+                }
+              </div>
+
+              <button
+                type="button"
+                (click)="toggleNewAddressForm()"
+                class="font-body text-xs uppercase tracking-wide text-forest self-start hover:underline"
+              >
+                + Novo endereço
+              </button>
+
+              <button
+                type="button"
+                (click)="confirmAddress()"
+                [disabled]="!selectedAddressId() || submitting()"
+                class="mt-2 font-body font-semibold text-base px-7 py-3.5 rounded-full border border-ink bg-forest text-canvas  transition duration-300 active:scale-[0.98] disabled:opacity-60"
+              >
+                {{ submitting() ? 'Confirmando…' : 'Continuar' }}
+              </button>
+            } @else {
+              <app-address-form
+                [submitting]="submitting()"
+                [showCancel]="addresses().length > 0"
+                (save)="submitNewAddress($event)"
+                (cancel)="toggleNewAddressForm()"
+              />
+            }
+          </div>
+        }
+
+        @case ('shipping') {
+          <div class="flex flex-col gap-4">
+            @if (shippingQuotes() === null) {
+              <p class="font-body text-sm text-ink/60">Calculando opções de frete…</p>
+            } @else {
+              @for (quote of shippingQuotes(); track quote.code) {
+                <button
+                  type="button"
+                  (click)="selectShippingOption(quote.code)"
+                  class="text-left bg-surface border rounded-3xl p-4 flex items-center justify-between transition-colors"
+                  [class.border-forest]="selectedShippingCode() === quote.code"
+                  [class.border-hairline]="selectedShippingCode() !== quote.code"
+                >
+                  <div>
+                    <p class="font-body text-ink">{{ quote.name }}</p>
+                    <p class="font-body text-xs text-ink/60">até {{ quote.estimatedDeliveryDays }} dias úteis</p>
+                  </div>
+                  <span class="font-body font-semibold text-ink">{{ quote.price | currency: 'BRL' }}</span>
+                </button>
+              }
+
+              <button
+                type="button"
+                (click)="confirmShipping()"
+                [disabled]="!selectedShippingCode() || submitting()"
+                class="mt-2 font-body font-semibold text-base px-7 py-3.5 rounded-full border border-ink bg-forest text-canvas  transition duration-300 active:scale-[0.98] disabled:opacity-60"
+              >
+                {{ submitting() ? 'Confirmando…' : 'Continuar' }}
+              </button>
+            }
+          </div>
+        }
+
+        @case ('payment') {
+          @let o = order()!;
+          <div class="flex flex-col gap-4">
+            <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-3">
+              <h2 class="font-body text-xs uppercase tracking-wide text-ink/50">Resumo do pedido</h2>
+              @for (item of o.items; track item.id) {
+                <div class="flex items-center justify-between font-body text-sm">
+                  <span class="text-ink">{{ item.quantity }}x {{ item.itemName }}</span>
+                  <span class="text-ink/70">{{ item.subtotal | currency: 'BRL' }}</span>
+                </div>
+              }
+              <div class="flex items-center justify-between font-body text-sm pt-2 border-t border-hairline">
+                <span class="text-ink">Frete — {{ o.shippingOptionName }}</span>
+                <span class="text-ink/70">{{ o.shippingCost | currency: 'BRL' }}</span>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-hairline">
+                <span class="font-body text-sm uppercase tracking-wide text-ink/70">Total</span>
+                <span class="font-body font-semibold text-xl text-ink">{{ o.totalAmount | currency: 'BRL' }}</span>
+              </div>
+            </div>
+
+            <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col items-center text-center gap-3">
+              <span class="font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-gold border border-gold/40 bg-gold/10 rounded-full px-3 py-1">
+                Em desenvolvimento
+              </span>
+              <h2 class="font-display text-2xl text-ink">Pagamento em desenvolvimento</h2>
+              <p class="font-body text-sm text-ink/60 max-w-md">
+                A finalização de pagamento ainda está sendo integrada. Cadastre um cartão abaixo para quando ficar pronto.
+              </p>
+            </div>
+
+            <app-card-form />
+          </div>
+        }
+
+        @case ('result') {
+          @let payment = paymentResult()!;
+          <div class="bg-surface border border-hairline rounded-3xl p-10 text-center flex flex-col items-center gap-4">
+            @if (payment.status === 'APPROVED') {
+              <h2 class="font-display text-2xl text-ink">Pedido confirmado ✓</h2>
+              <p class="font-body text-ink/70">
+                Pagamento de {{ payment.amount | currency: 'BRL' }} aprovado. Obrigado pela compra!
+              </p>
+              <a
+                routerLink="/cliente"
+                class="font-body text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 transition-shadow"
+              >
+                Ir pra minha conta
+              </a>
+            } @else if (payment.status === 'DECLINED') {
+              <h2 class="font-display text-2xl text-clay">Pagamento recusado</h2>
+              <p class="font-body text-ink/70">Não conseguimos processar o pagamento. Tente novamente.</p>
+              <button
+                type="button"
+                (click)="retryPayment()"
+                class="font-body text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 transition-shadow"
+              >
+                Tentar novamente
+              </button>
+            } @else {
+              <h2 class="font-display text-2xl text-ink">Pagamento em análise</h2>
+              <p class="font-body text-ink/70">Assim que for confirmado, seu pedido segue pra separação.</p>
+              <a
+                routerLink="/cliente"
+                class="font-body text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 transition-shadow"
+              >
+                Ir pra minha conta
+              </a>
+            }
+          </div>
+        }
+      }
+    }
+  </main>
+</div>

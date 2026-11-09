@@ -1,0 +1,96 @@
+<header class="glass sticky top-0 z-40 border-b border-hairline/80">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="h-16 sm:h-[72px] flex items-center gap-4">
+      <a routerLink="/" class="shrink-0 group flex items-center gap-2.5" aria-label="Jequí, artesanatos do vale — página inicial">
+        <img src="logo-jequi.png" alt="" aria-hidden="true" class="h-9 sm:h-11 w-auto transition-transform duration-300 ease-out group-hover:-translate-y-0.5" />
+        <span class="flex flex-col leading-none">
+          <span class="font-display text-ink text-xl sm:text-2xl transition-colors group-hover:text-forest">Jequí</span>
+          <span class="font-body text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-clay mt-0.5">artesanatos do vale</span>
+        </span>
+      </a>
+
+      <div class="flex items-center gap-3 sm:gap-4 ml-auto">
+      <form (submit)="submitSearch($event)" role="search" class="relative hidden sm:block w-60 lg:w-80">
+        <svg class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21,21 L16.65,16.65" />
+        </svg>
+        <input
+          type="search"
+          aria-label="Buscar peças no catálogo"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          placeholder="Buscar peças…"
+          class="w-full bg-surface/70 font-body text-sm text-ink placeholder:text-ink/40 border border-hairline rounded-full pl-10 pr-4 h-11 transition duration-200 focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+        />
+      </form>
+
+      <a
+        routerLink="/politica-de-seguranca"
+        class="hidden sm:flex items-center h-11 font-body text-sm font-medium text-stone hover:text-forest"
+      >
+        Segurança
+      </a>
+
+      <nav class="shrink-0 flex items-center gap-2 sm:gap-3" aria-label="Conta">
+        @if (isAuthenticated()) {
+          <a
+            routerLink="/carrinho"
+            class="relative flex items-center justify-center h-11 w-11 rounded-full border border-hairline bg-surface/70 text-ink hover:border-forest hover:text-forest"
+            [attr.aria-label]="itemCount() > 0 ? 'Carrinho, ' + itemCount() + ' itens' : 'Carrinho'"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M3,4 H5 L7.5,15 H18 L21,7 H6" />
+              <circle cx="9" cy="20" r="1.5" />
+              <circle cx="17" cy="20" r="1.5" />
+            </svg>
+            @for (count of [itemCount()]; track count) {
+              @if (count > 0) {
+                <span
+                  class="cart-bump absolute -top-1 -right-1 flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-forest text-canvas font-body text-[11px] font-semibold"
+                  aria-hidden="true"
+                >
+                  {{ count }}
+                </span>
+              }
+            }
+          </a>
+          <a
+            routerLink="/cliente"
+            [attr.aria-label]="firstName() ? 'Olá, ' + firstName() + '. Minha conta' : 'Minha conta'"
+            class="flex items-center justify-center sm:justify-start gap-2 h-11 w-11 sm:w-auto font-body text-sm font-medium text-canvas bg-ink rounded-full sm:px-5 hover:bg-espresso"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4,21 C4,16 8,13 12,13 C16,13 20,16 20,21" />
+            </svg>
+            <span class="hidden sm:inline">{{ firstName() ? 'Olá, ' + firstName() : 'Minha conta' }}</span>
+          </a>
+        } @else {
+          <a
+            routerLink="/login"
+            class="flex items-center h-11 font-body text-sm font-medium text-canvas bg-ink rounded-full px-5 hover:bg-espresso"
+          >
+            Entrar
+          </a>
+        }
+      </nav>
+      </div>
+    </div>
+
+    <form (submit)="submitSearch($event)" role="search" class="relative sm:hidden pb-3">
+      <svg class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M21,21 L16.65,16.65" />
+      </svg>
+      <input
+        type="search"
+        aria-label="Buscar peças no catálogo"
+        [value]="searchTerm()"
+        (input)="searchTerm.set($any($event.target).value)"
+        placeholder="Buscar peças…"
+        class="w-full bg-surface/70 font-body text-sm text-ink placeholder:text-ink/40 border border-hairline rounded-full pl-10 pr-4 h-11 transition duration-200 focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </form>
+  </div>
+</header>

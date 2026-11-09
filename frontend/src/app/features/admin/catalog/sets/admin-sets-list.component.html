@@ -1,0 +1,82 @@
+<div class="min-h-screen">
+
+  <main id="conteudo" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="font-display text-4xl text-ink">Conjuntos</h1>
+      <a
+        routerLink="/admin/conjuntos/novo"
+        class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-5 py-3 transition-shadow"
+      >
+        + Novo conjunto
+      </a>
+    </div>
+
+    @if (errorMessage()) {
+      <p role="alert" class="font-body text-sm text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else if (sets().length === 0) {
+      <p class="font-body text-base text-ink/60">Nenhum conjunto cadastrado.</p>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (set of sets(); track set.id) {
+          <div class="bg-surface border border-hairline rounded-3xl p-5 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <p class="font-body text-lg text-ink truncate">{{ set.name }}</p>
+              <p class="font-body text-sm text-ink/60">
+                {{ set.price | currency: 'BRL' }} · {{ set.availableStock }} disponível · {{ set.pieces.length }} peças
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <a
+                [routerLink]="['/admin/conjuntos', set.id, 'editar']"
+                class="font-body text-xs uppercase tracking-wide text-ink border border-hairline rounded-full px-3 py-2 hover:border-forest transition-colors"
+              >
+                Editar
+              </a>
+              <button
+                type="button"
+                (click)="deleteSet(set)"
+                [disabled]="deletingId() === set.id"
+                aria-label="Excluir conjunto"
+                class="flex items-center justify-center h-9 w-9 rounded-full text-ink/40 hover:text-canvas hover:bg-clay transition-colors disabled:opacity-40"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5,5 L19,19 M19,5 L5,19" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-4 mt-10">
+          <button
+            type="button"
+            (click)="goToPage(-1)"
+            [disabled]="!hasPrev()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Anterior
+          </button>
+          <span class="font-body text-sm text-ink/70">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="goToPage(1)"
+            [disabled]="!hasNext()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Próxima
+          </button>
+        </div>
+      }
+    }
+  </main>
+</div>

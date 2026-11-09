@@ -1,0 +1,161 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    @if (loading()) {
+      <p class="font-body text-sm text-ink/60">Carregando…</p>
+    } @else if (customer()) {
+      @let c = customer()!;
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <p class="font-body text-xs tracking-[2px] uppercase text-clay mb-1">Minha conta</p>
+          <h1 class="font-display text-4xl text-ink">Olá, {{ c.firstName }}</h1>
+        </div>
+        <button
+          type="button"
+          (click)="logout()"
+          class="font-body text-xs uppercase tracking-wide text-ink/60 border border-hairline rounded-full px-4 py-2 hover:border-clay hover:text-clay transition-colors"
+        >
+          Sair
+        </button>
+      </div>
+
+      @if (errorMessage()) {
+        <p role="alert" class="font-body text-xs text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      @if (!editing()) {
+        <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-4 mb-6">
+          <div class="flex items-center justify-between">
+            <h2 class="font-body text-xs uppercase tracking-wide text-ink/50">Dados pessoais</h2>
+            <button
+              type="button"
+              (click)="startEditing()"
+              class="font-body text-[11px] uppercase tracking-wide text-forest hover:underline"
+            >
+              Editar
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p class="font-body text-[10px] uppercase tracking-wide text-ink/40">Nome</p>
+              <p class="font-body text-lg text-ink">{{ c.firstName }} {{ c.lastName }}</p>
+            </div>
+            <div>
+              <p class="font-body text-[10px] uppercase tracking-wide text-ink/40">E-mail</p>
+              <p class="font-body text-lg text-ink">{{ c.email }}</p>
+            </div>
+            <div>
+              <p class="font-body text-[10px] uppercase tracking-wide text-ink/40">Telefone</p>
+              <p class="font-body text-lg text-ink">{{ c.phone }}</p>
+            </div>
+            <div>
+              <p class="font-body text-[10px] uppercase tracking-wide text-ink/40">CPF</p>
+              <p class="font-body text-lg text-ink">{{ c.cpf }}</p>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-4 mb-6">
+          <h2 class="font-body text-xs uppercase tracking-wide text-ink/50">Editar dados pessoais</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="f-firstName" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Nome</label>
+              <input id="f-firstName"
+ autocomplete="given-name"
+                type="text"
+                formControlName="firstName"
+                class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+              />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="f-lastName" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Sobrenome</label>
+              <input id="f-lastName"
+ autocomplete="family-name"
+                type="text"
+                formControlName="lastName"
+                class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+              />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="f-email" class="font-body text-[11px] tracking-wide uppercase text-ink/70">E-mail</label>
+              <input id="f-email"
+ autocomplete="email"
+                type="email"
+                formControlName="email"
+                class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+              />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="f-phone" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Telefone</label>
+              <input id="f-phone"
+ autocomplete="tel"
+                type="tel"
+                inputmode="tel"
+                maxlength="16"
+                appMask="phone"
+                formControlName="phone"
+                class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+              />
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button
+              type="button"
+              (click)="cancelEditing()"
+              class="font-body text-xs uppercase tracking-wide text-ink/60 border border-hairline rounded-full px-5 py-3"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="submitting()"
+              class="flex-1 font-body font-semibold text-base px-7 py-3 rounded-full border border-ink bg-forest text-canvas  disabled:opacity-60"
+            >
+              {{ submitting() ? 'Salvando…' : 'Salvar alterações' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a
+          routerLink="/carrinho"
+          class="block bg-surface border border-hairline rounded-3xl p-5 sm:p-6 hover:border-forest transition-colors"
+        >
+          <h2 class="font-display text-xl text-ink">Meu carrinho</h2>
+          <p class="font-body text-base text-ink/60 mt-1">Ver itens adicionados e finalizar compra.</p>
+        </a>
+
+        <a
+          routerLink="/pedidos"
+          class="block bg-surface border border-hairline rounded-3xl p-5 sm:p-6 hover:border-forest transition-colors"
+        >
+          <h2 class="font-display text-xl text-ink">Meus pedidos</h2>
+          <p class="font-body text-base text-ink/60 mt-1">Acompanhar status e histórico de compras.</p>
+        </a>
+
+        <a
+          routerLink="/cliente/enderecos"
+          class="block bg-surface border border-hairline rounded-3xl p-5 sm:p-6 hover:border-forest transition-colors"
+        >
+          <h2 class="font-display text-xl text-ink">Meus endereços</h2>
+          <p class="font-body text-base text-ink/60 mt-1">Gerenciar endereços de entrega.</p>
+        </a>
+
+        <a
+          routerLink="/cliente/cartoes"
+          class="block bg-surface border border-hairline rounded-3xl p-5 sm:p-6 hover:border-forest transition-colors"
+        >
+          <div class="flex items-center gap-2">
+            <h2 class="font-display text-xl text-ink">Formas de pagamento</h2>
+            <span class="font-body text-[9px] font-semibold uppercase tracking-wide text-gold border border-gold/40 bg-gold/10 rounded-full px-2 py-0.5">Em dev</span>
+          </div>
+          <p class="font-body text-base text-ink/60 mt-1">Cadastrar cartão para pagar na loja.</p>
+        </a>
+      </div>
+    }
+  </main>
+</div>

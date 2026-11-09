@@ -1,0 +1,71 @@
+<div class="min-h-screen">
+
+  <main id="conteudo" class="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <h1 class="font-display text-4xl text-ink mb-8">Categorias</h1>
+
+    @if (errorMessage()) {
+      <p role="alert" class="font-body text-sm text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-end gap-4 mb-8">
+      <div class="flex flex-col gap-1.5 flex-1">
+        <label for="f-name" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Nome</label>
+        <input id="f-name"
+ autocomplete="off"
+          type="text"
+          formControlName="name"
+          class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5 flex-1">
+        <label for="f-description" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Descrição (opcional)</label>
+        <input id="f-description"
+ autocomplete="off"
+          type="text"
+          formControlName="description"
+          class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+        />
+      </div>
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-6 py-3 disabled:opacity-60"
+      >
+        {{ submitting() ? 'Criando…' : '+ Adicionar' }}
+      </button>
+    </form>
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else if (categories().length === 0) {
+      <p class="font-body text-base text-ink/60">Nenhuma categoria cadastrada.</p>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (category of categories(); track category.id) {
+          <div class="bg-surface border border-hairline rounded-3xl p-5 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-body text-lg text-ink">{{ category.name }}</p>
+              @if (category.description) {
+                <p class="font-body text-sm text-ink/60">{{ category.description }}</p>
+              }
+            </div>
+            <button
+              type="button"
+              (click)="deleteCategory(category)"
+              [disabled]="deletingId() === category.id"
+              aria-label="Excluir categoria"
+              class="shrink-0 flex items-center justify-center h-9 w-9 rounded-full text-ink/40 hover:text-canvas hover:bg-clay transition-colors disabled:opacity-40"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5,5 L19,19 M19,5 L5,19" />
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>

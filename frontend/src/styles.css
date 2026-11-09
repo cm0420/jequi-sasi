@@ -1,0 +1,341 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  button, a, input, select, textarea, label {
+    touch-action: manipulation;
+  }
+
+  /* Header fixo não cobre o campo focado nem o alvo do skip link. */
+  :target, :focus {
+    scroll-margin-top: 88px;
+  }
+
+  ::placeholder {
+    color: rgba(28, 27, 26, 0.4);
+  }
+
+  select {
+    background-color: #fffcf7;
+    color: #1c1b1a;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-body;
+    font-size: 17px;
+    font-feature-settings: 'tnum' 1; /* preços e números alinhados */
+    min-height: 100vh;
+  }
+
+  /* Sem fundo líquido de página inteira: o vidro fica discreto (header + hero). */
+
+  ::selection {
+    background: #224228;
+    color: #f7f1e8;
+  }
+
+  :focus-visible {
+    outline: 2px solid #224228;
+    outline-offset: 3px;
+  }
+
+  /* Conteúdo de cada tela entra uma vez, de leve. */
+  main {
+    animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+.font-display {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* ---- Micro-interações: todo botão e link-botão responde ao ponteiro ---- */
+button,
+a.rounded-full {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+button:not(:disabled):hover,
+a.rounded-full:hover {
+  transform: translateY(-1px);
+}
+button:not(:disabled):active,
+a.rounded-full:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* Botão principal "líquido": brilho que escorre no hover. */
+:is(button, a).bg-forest {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 10px 24px -12px rgba(34, 66, 40, 0.7);
+}
+:is(button, a).bg-forest::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 140% at 50% 120%, #4f7a55 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+:is(button, a).bg-forest:not(:disabled):hover {
+  background-color: #2f5a36;
+}
+:is(button, a).bg-forest:not(:disabled):hover::after {
+  opacity: 1;
+  animation: sheen 2.8s ease-in-out infinite;
+}
+
+/* Cards clicáveis: sobem 2px, a foto aproxima dentro da moldura. */
+a.rounded-3xl {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+a.rounded-3xl:hover {
+  transform: translateY(-2px);
+  @apply shadow-lift;
+}
+
+/* Vidro: header e superfícies flutuantes. */
+.glass {
+  background: rgba(247, 241, 232, 0.72);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+
+/* Moldura de produto sem foto: gradiente que respira. */
+.liquid-fill {
+  background: linear-gradient(135deg, #224228, #5c6f5d, #849671, #bc924c);
+  background-size: 300% 300%;
+  animation: flow 9s ease-in-out infinite;
+}
+.liquid-fill-warm {
+  background: linear-gradient(135deg, #6b443d, #bc924c, #39221e, #849671);
+  background-size: 300% 300%;
+  animation: flow 11s ease-in-out infinite;
+}
+
+/* Blob morfando atrás do título da vitrine. */
+.blob {
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  animation: morph 14s ease-in-out infinite;
+}
+
+/* Vitrine: lava-lamp de quatro cores da paleta, cada gota num ritmo. */
+/* Brilho ambiente espalhado atrás do topo: manchas largas e suaves, sem núcleo denso. */
+.hero-liquid {
+  position: absolute;
+  z-index: -1;
+  top: -14%;
+  left: -8%;
+  right: -8%;
+  height: 150%;
+  pointer-events: none;
+}
+.hero-liquid span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(96px);
+  opacity: 0.28;
+}
+.hero-liquid span:nth-child(1) {
+  inset: 2% 58% 46% 4%;
+  background: #6fa070;
+  animation: lava-1 15s ease-in-out infinite alternate;
+}
+.hero-liquid span:nth-child(2) {
+  inset: 8% 4% 40% 60%;
+  background: #e2b25c;
+  animation: lava-2 19s ease-in-out infinite alternate;
+}
+.hero-liquid span:nth-child(3) {
+  inset: 48% 30% 2% 50%;
+  background: #d07a52;
+  animation: lava-3 17s ease-in-out infinite alternate;
+}
+.hero-liquid span:nth-child(4) {
+  inset: 44% 62% 6% 6%;
+  background: #2a6f7b; /* único respingo de azul, só no hero */
+  opacity: 0.22;
+  animation: lava-2 23s ease-in-out infinite alternate-reverse;
+}
+@keyframes lava-1 {
+  50% { transform: translate(18%, 12%) scale(1.15); border-radius: 40% 60% 55% 45%; }
+  100% { transform: translate(-6%, 22%) scale(0.9); }
+}
+@keyframes lava-2 {
+  50% { transform: translate(-20%, -8%) scale(1.2); border-radius: 60% 40% 45% 55%; }
+  100% { transform: translate(-8%, 14%) scale(0.95); }
+}
+@keyframes lava-3 {
+  50% { transform: translate(14%, -18%) scale(1.1); }
+  100% { transform: translate(24%, 4%) scale(1.2); }
+}
+
+/* Indicadores do admin: uma gota de cor no canto de cada cartão. */
+.kpi::after,
+.kpi-dark::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 9999px;
+  filter: blur(26px);
+  opacity: 0.45;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.kpi:hover::after,
+.kpi-dark:hover::after {
+  transform: scale(1.35) translate(-10px, 10px);
+}
+.kpi-forest::after { background: #6fa070; }
+.kpi-gold::after { background: #e2b25c; }
+.kpi-clay::after { background: #d07a52; }
+.kpi-dark::after { background: #af751b; opacity: 0.6; }
+
+/* Troca de página fluida (Angular withViewTransitions). */
+::view-transition-old(root) {
+  animation: vt-out 0.28s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes vt-out {
+  to { opacity: 0; transform: scale(0.985); filter: blur(4px); }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: scale(1.015); filter: blur(4px); }
+}
+
+.drawer-slide {
+  animation: slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.drawer-fade {
+  animation: fade-in 0.3s ease both;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes drift-a {
+  to { transform: translate(-8vw, 10vh) scale(1.12); }
+}
+@keyframes drift-b {
+  to { transform: translate(10vw, -8vh) scale(1.08); }
+}
+@keyframes flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes sheen {
+  0%, 100% { transform: translateX(-12%); }
+  50% { transform: translateX(12%); }
+}
+@keyframes morph {
+  0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: rotate(0deg) scale(1); }
+  33% { border-radius: 63% 37% 39% 61% / 55% 38% 62% 45%; transform: rotate(8deg) scale(1.04); }
+  66% { border-radius: 35% 65% 52% 48% / 38% 60% 40% 62%; transform: rotate(-6deg) scale(0.98); }
+}
+
+/* Retorno de ação: a contagem do carrinho pula a cada item adicionado. */
+.cart-bump {
+  animation: bump 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes bump {
+  40% { transform: scale(1.35); }
+}
+
+/* Momento de entrada da vitrine: sublinhado que se desenha sob "à mão". */
+.draw-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  padding-bottom: 2px;
+  animation: draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+}
+@keyframes draw {
+  to { background-size: 100% 2px; }
+}
+
+/* Vitrine do hero: três molduras sobrepostas que flutuam de leve. */
+.showcase-frame {
+  will-change: transform;
+}
+.showcase-frame-1 {
+  top: 0;
+  left: 2%;
+  width: 60%;
+  height: 56%;
+  border-radius: 2.75rem 3.25rem 2.5rem 3rem;
+  animation: float-y 9s ease-in-out infinite;
+}
+.showcase-frame-2 {
+  top: 26%;
+  right: 0;
+  width: 50%;
+  height: 54%;
+  border-radius: 3.25rem 2.5rem 3rem 2.75rem;
+  animation: float-y 11s ease-in-out infinite 0.8s;
+}
+.showcase-frame-3 {
+  bottom: 0;
+  left: 14%;
+  width: 46%;
+  height: 40%;
+  border-radius: 2.5rem 3rem 2.75rem 3.25rem;
+  animation: float-y 10s ease-in-out infinite 1.6s;
+}
+@keyframes float-y {
+  50% { transform: translateY(-14px) rotate(-0.6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  /* Sem animar o desenho: já mostra o sublinhado completo. */
+  .draw-underline {
+    background-size: 100% 2px;
+  }
+}

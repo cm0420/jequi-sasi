@@ -1,0 +1,126 @@
+<div class="min-h-screen">
+
+  <main id="conteudo" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="font-display text-4xl text-ink">Peças</h1>
+      <a
+        routerLink="/admin/pecas/novo"
+        class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-5 py-3 transition-shadow"
+      >
+        + Nova peça
+      </a>
+    </div>
+
+    @if (errorMessage()) {
+      <p role="alert" class="font-body text-sm text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else if (pieces().length === 0) {
+      <p class="font-body text-base text-ink/60">Nenhuma peça cadastrada.</p>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (piece of pieces(); track piece.id) {
+          <div class="bg-surface border border-hairline rounded-3xl p-5">
+            <div class="flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <p class="font-body text-lg text-ink truncate">{{ piece.name }}</p>
+                <p class="font-body text-sm text-ink/60">
+                  {{ piece.price | currency: 'BRL' }} · {{ piece.stock }} em estoque
+                  @if (piece.categories.length > 0) {
+                    · {{ piece.categories[0].name }}
+                  }
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  (click)="toggleAdjust(piece)"
+                  class="font-body text-xs uppercase tracking-wide text-forest border border-forest rounded-full px-3 py-2 hover:bg-forest hover:text-canvas transition-colors"
+                >
+                  Estoque
+                </button>
+                <a
+                  [routerLink]="['/admin/pecas', piece.id, 'editar']"
+                  class="font-body text-xs uppercase tracking-wide text-ink border border-hairline rounded-full px-3 py-2 hover:border-forest transition-colors"
+                >
+                  Editar
+                </a>
+                <button
+                  type="button"
+                  (click)="deletePiece(piece)"
+                  [disabled]="deletingId() === piece.id"
+                  aria-label="Excluir peça"
+                  class="flex items-center justify-center h-9 w-9 rounded-full text-ink/40 hover:text-canvas hover:bg-clay transition-colors disabled:opacity-40"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5,5 L19,19 M19,5 L5,19" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            @if (adjustingId() === piece.id) {
+              <div class="mt-4 pt-4 border-t border-hairline flex flex-col sm:flex-row sm:items-end gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label for="f-campo-1" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Ajuste (+/-)</label>
+                  <input id="f-campo-1"
+                    type="number"
+                    [value]="adjustDelta()"
+                    (input)="adjustDelta.set(+$any($event.target).value)"
+                    class="font-body border border-hairline rounded-xl px-4 py-2.5 text-ink w-28 focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5 flex-1">
+                  <label for="f-campo-2" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Motivo</label>
+                  <input id="f-campo-2"
+                    type="text"
+                    [value]="adjustReason()"
+                    (input)="adjustReason.set($any($event.target).value)"
+                    placeholder="Ex: reposição, avaria, contagem…"
+                    class="font-body border border-hairline rounded-xl px-4 py-2.5 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+                  />
+                </div>
+                <button
+                  type="button"
+                  (click)="submitAdjust(piece)"
+                  [disabled]="adjustSubmitting() || adjustDelta() === 0 || adjustReason().trim().length === 0"
+                  class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest rounded-full px-5 py-2.5 disabled:opacity-60"
+                >
+                  {{ adjustSubmitting() ? 'Salvando…' : 'Confirmar' }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-4 mt-10">
+          <button
+            type="button"
+            (click)="goToPage(-1)"
+            [disabled]="!hasPrev()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Anterior
+          </button>
+          <span class="font-body text-sm text-ink/70">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="goToPage(1)"
+            [disabled]="!hasNext()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Próxima
+          </button>
+        </div>
+      }
+    }
+  </main>
+</div>

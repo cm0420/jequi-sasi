@@ -1,0 +1,79 @@
+<div class="min-h-screen">
+
+  <main id="conteudo" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <h1 class="font-display text-4xl text-ink mb-8">Pedidos</h1>
+
+    <div class="bg-surface border border-hairline rounded-3xl p-4 sm:p-5 mb-8 shadow-soft">
+      <p class="font-body text-xs font-semibold uppercase tracking-[0.14em] text-ink/50 mb-3">Filtrar por status</p>
+      <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar pedidos por status">
+        <button
+          type="button"
+          (click)="selectStatus(null)"
+          [attr.aria-pressed]="selectedStatus() === null"
+          [class]="pillClass(selectedStatus() === null)"
+        >
+          Todos
+        </button>
+        @for (status of statusFilters; track status) {
+          @if (status) {
+            <button
+              type="button"
+              (click)="selectStatus(status)"
+              [attr.aria-pressed]="selectedStatus() === status"
+              [class]="pillClass(selectedStatus() === status)"
+            >
+              {{ statusLabel[status] }}
+            </button>
+          }
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else if (orders().length === 0) {
+      <p class="font-body text-base text-ink/60">Nenhum pedido encontrado.</p>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (order of orders(); track order.id) {
+          <a
+            [routerLink]="['/admin/pedidos', order.id]"
+            class="block bg-surface border border-hairline rounded-3xl p-5 hover:border-forest transition-colors"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-body text-sm font-semibold uppercase tracking-wide" [class]="statusClass(order.status)">
+                {{ statusLabel[order.status] }}
+              </span>
+              <span class="font-body text-sm text-ink/50">{{ order.createdAt | date: 'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="font-body text-lg text-ink">{{ order.recipientName ?? 'Sem destinatário' }}</p>
+            <p class="font-body font-semibold text-ink mt-1">{{ order.totalAmount | currency: 'BRL' }}</p>
+          </a>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-4 mt-10">
+          <button
+            type="button"
+            (click)="goToPage(-1)"
+            [disabled]="!hasPrev()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Anterior
+          </button>
+          <span class="font-body text-sm text-ink/70">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="goToPage(1)"
+            [disabled]="!hasNext()"
+            class="font-body font-semibold text-sm uppercase tracking-wide px-5 py-3 rounded-full border border-ink text-ink disabled:opacity-30"
+          >
+            Próxima
+          </button>
+        </div>
+      }
+    }
+  </main>
+</div>

@@ -1,0 +1,147 @@
+<div class="min-h-screen">
+  <app-site-header />
+
+  <main id="conteudo" class="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+    <section class="relative pt-14 sm:pt-24 pb-12 sm:pb-16 grid lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-10" aria-labelledby="vitrine-titulo">
+      <div class="hero-liquid" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div class="relative z-10">
+        <p class="font-body text-xs font-semibold uppercase tracking-[0.16em] text-clay mb-4">Artesanato feito à mão</p>
+        <h1 id="vitrine-titulo" class="font-display text-ink text-5xl sm:text-7xl">
+          Artesanato de barro, feito <em class="italic text-forest draw-underline">à mão</em>.
+        </h1>
+        <p class="font-body text-lg text-stone max-w-xl mt-6">
+          Escolha uma peça avulsa ou um conjunto pronto. O estoque mostrado é o que está disponível agora.
+        </p>
+        <a
+          routerLink="/catalogo"
+          class="inline-flex items-center gap-2 h-12 mt-8 px-7 rounded-full bg-forest text-canvas font-body text-sm font-semibold hover:bg-moss"
+        >
+          Ver todo o catálogo
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M4,12 H19 M13,6 L19,12 L13,18" />
+          </svg>
+        </a>
+      </div>
+
+      @if (heroPieces().length >= 2) {
+        <div class="relative hidden lg:block h-[420px]" aria-hidden="true">
+          @for (piece of heroPieces(); track piece.id) {
+            <figure class="showcase-frame showcase-frame-{{ $index + 1 }} absolute overflow-hidden bg-surface border border-surface shadow-lift">
+              <img [src]="piece.imageUrls[0]" [alt]="piece.name" loading="lazy" class="w-full h-full object-cover" />
+            </figure>
+          }
+        </div>
+      }
+    </section>
+
+    @if (recommended().length > 0) {
+      <section class="pb-14 sm:pb-20" aria-labelledby="selecionados-titulo">
+        <div class="flex items-end justify-between gap-4 mb-6">
+          <div>
+            <p class="font-body text-xs font-semibold uppercase tracking-[0.16em] text-clay mb-2">Selecionados</p>
+            <h2 id="selecionados-titulo" class="font-display text-ink text-3xl sm:text-4xl">Peças à mão, em estoque agora</h2>
+          </div>
+          <span class="hidden sm:inline-block h-px flex-1 max-w-[180px] bg-hairline mb-3"></span>
+        </div>
+        <ul class="flex gap-5 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 snap-x">
+          @for (piece of recommended(); track piece.id) {
+            <li class="snap-start shrink-0 w-56 sm:w-auto">
+              <a
+                [routerLink]="['/pecas', piece.id]"
+                class="group bg-surface border border-hairline rounded-3xl overflow-hidden flex flex-col h-full transition duration-300 ease-out hover:border-forest"
+              >
+                <div class="h-44 relative overflow-hidden">
+                  <img
+                    [src]="piece.imageUrls[0]"
+                    [alt]="piece.name"
+                    loading="lazy"
+                    class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div class="p-4 flex flex-col gap-1">
+                  @if (piece.categories.length > 0) {
+                    <span class="font-body text-xs font-semibold uppercase tracking-wide text-clay">{{ piece.categories[0].name }}</span>
+                  }
+                  <h3 class="font-display text-xl text-ink transition-colors duration-200 group-hover:text-forest">{{ piece.name }}</h3>
+                  <span class="font-body font-bold text-ink text-base">{{ piece.price | currency: 'BRL' }}</span>
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <section class="pb-14 sm:pb-20" aria-labelledby="origem-titulo">
+      <div class="rounded-3xl bg-espresso text-canvas px-6 sm:px-12 py-12 sm:py-16">
+        <p class="font-body text-xs font-semibold uppercase tracking-[0.18em] text-gold-pale mb-5">Vale do Jequitinhonha</p>
+        <p id="origem-titulo" class="font-display text-2xl sm:text-[34px] leading-snug max-w-3xl text-justify">
+          Do barro do Vale do Jequitinhonha para a sua casa: peças únicas, modeladas e pintadas à mão por artesãos que fazem da tradição um ofício. Cada obra carrega a cor e a história de uma terra que transforma argila em arte.
+        </p>
+      </div>
+    </section>
+
+    @if (featured().length > 0) {
+      <section class="pb-14 sm:pb-20 flex flex-col gap-10 sm:gap-14" aria-labelledby="destaque-titulo">
+        <h2 id="destaque-titulo" class="sr-only">Peças em destaque</h2>
+        @for (piece of featured(); track piece.id) {
+          <article class="grid md:grid-cols-2 gap-6 sm:gap-10 items-center">
+            <a
+              [routerLink]="['/pecas', piece.id]"
+              class="group block rounded-3xl overflow-hidden border border-hairline shadow-soft {{ $even ? '' : 'md:order-2' }}"
+            >
+              <img
+                [src]="piece.imageUrls[0]"
+                [alt]="piece.name"
+                loading="lazy"
+                class="w-full h-64 sm:h-80 object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+              />
+            </a>
+            <div>
+              <p class="font-body text-xs font-semibold uppercase tracking-[0.16em] text-clay mb-3">Em destaque</p>
+              <h3 class="font-display text-ink text-3xl sm:text-4xl">{{ piece.name }}</h3>
+              @if (piece.description) {
+                <p class="font-body text-base text-stone mt-4 max-w-md">{{ piece.description }}</p>
+              }
+              <div class="flex flex-wrap items-center gap-2 mt-5">
+                @for (category of piece.categories; track category.id) {
+                  <span class="font-body text-xs font-medium text-stone border border-hairline rounded-full px-3 py-1">{{ category.name }}</span>
+                }
+              </div>
+              <div class="flex items-center gap-4 mt-6">
+                <span class="font-display text-ink text-2xl">{{ piece.price | currency: 'BRL' }}</span>
+                @if (piece.inStock) {
+                  <span class="font-body text-sm font-semibold text-tide">{{ piece.stock }} em estoque</span>
+                } @else {
+                  <span class="font-body text-sm font-semibold text-danger">Esgotado</span>
+                }
+              </div>
+              <a
+                [routerLink]="['/pecas', piece.id]"
+                class="inline-flex items-center h-12 mt-7 px-7 rounded-full bg-forest text-canvas font-body text-sm font-semibold hover:bg-moss"
+              >
+                Ver peça
+              </a>
+            </div>
+          </article>
+        }
+      </section>
+    }
+
+    <section class="pt-4 pb-6 flex flex-col items-center text-center gap-5 border-t border-hairline">
+      <div>
+        <h2 class="font-display text-ink text-3xl sm:text-4xl">Explore o acervo completo</h2>
+        <p class="font-body text-base text-stone mt-3 max-w-md">Todas as peças avulsas e os conjuntos num só lugar, com busca e filtros.</p>
+      </div>
+      <a
+        routerLink="/catalogo"
+        class="inline-flex items-center gap-2 h-14 px-8 rounded-full bg-forest text-canvas font-body text-base font-semibold hover:bg-moss"
+      >
+        Ir para todo o catálogo
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4,12 H19 M13,6 L19,12 L13,18" />
+        </svg>
+      </a>
+    </section>
+  </main>
+</div>

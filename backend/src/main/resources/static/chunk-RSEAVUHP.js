@@ -1,0 +1,1 @@
+var e={CARRINHO:"Carrinho",AGUARDANDO_PAGAMENTO:"Aguardando pagamento",PAGO:"Pago",ENVIADO:"Enviado",ENTREGUE:"Entregue",CANCELADO:"Cancelado",EXPIRADO:"Expirado",ESTORNO_SOLICITADO:"Estorno solicitado",ESTORNADO:"Estornado"};export{e as a};

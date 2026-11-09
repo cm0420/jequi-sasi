@@ -1,0 +1,211 @@
+<div class="min-h-screen">
+
+  <main id="conteudo" class="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <app-back-link to="/admin/pedidos" label="Pedidos" />
+
+    @if (loading()) {
+      <p class="font-body text-base text-ink/60">Carregando…</p>
+    } @else if (notFound() || !detail()) {
+      <p class="font-body text-base text-clay">Pedido não encontrado.</p>
+    } @else {
+      @let d = detail()!;
+      @let o = d.order;
+
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="font-display text-4xl text-ink">Pedido</h1>
+        <span class="font-body text-sm font-semibold uppercase tracking-wide bg-ink text-canvas px-3 py-1.5 rounded-xl">
+          {{ statusLabel[o.status] }}
+        </span>
+      </div>
+
+      @if (errorMessage()) {
+        <p role="alert" class="font-body text-sm text-danger border border-danger/25 bg-danger/5 rounded-xl px-3 py-2 mb-6">
+          {{ errorMessage() }}
+        </p>
+      }
+      @if (actionMessage()) {
+        <p class="font-body text-sm text-forest border border-forest/30 bg-forest/5 rounded-xl px-3 py-2 mb-6">
+          {{ actionMessage() }}
+        </p>
+      }
+
+      <div class="flex gap-6 mb-8 border-b-2 border-hairline">
+        <button
+          type="button"
+          (click)="switchTab('detalhes')"
+          [class]="'font-body font-semibold text-xl px-1 pb-3 border-b-4 transition-colors -mb-0.5 ' + (tab() === 'detalhes' ? 'border-forest text-forest' : 'border-transparent text-ink/50')"
+        >
+          Detalhes
+        </button>
+        <button
+          type="button"
+          (click)="switchTab('acoes')"
+          [class]="'relative font-body font-semibold text-xl px-1 pb-3 border-b-4 transition-colors -mb-0.5 ' + (tab() === 'acoes' ? 'border-forest text-forest' : 'border-transparent text-ink/50')"
+        >
+          Ações
+          @if (hasActions()) {
+            <span class="absolute -top-1 -right-3 h-2.5 w-2.5 rounded-full bg-clay"></span>
+          }
+        </button>
+      </div>
+
+      @if (tab() === 'detalhes') {
+        <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-1 mb-6">
+          <h2 class="font-body text-xs uppercase tracking-wide text-ink/50 mb-2">Cliente</h2>
+          <p class="font-body text-lg text-ink">{{ d.customerName }}</p>
+          <p class="font-body text-ink/70">{{ d.customerEmail }}</p>
+          <p class="font-body text-ink/70">{{ d.customerPhone }}</p>
+        </div>
+
+        <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-3 mb-6">
+          <h2 class="font-body text-xs uppercase tracking-wide text-ink/50">Itens</h2>
+          @for (item of o.items; track item.id) {
+            <div class="flex items-center justify-between font-body">
+              <span class="text-ink">{{ item.quantity }}x {{ item.itemName }}</span>
+              <span class="text-ink/70">{{ item.subtotal | currency: 'BRL' }}</span>
+            </div>
+          }
+          @if (o.shippingOptionName) {
+            <div class="flex items-center justify-between font-body pt-2 border-t border-hairline">
+              <span class="text-ink">Frete — {{ o.shippingOptionName }}</span>
+              <span class="text-ink/70">{{ o.shippingCost | currency: 'BRL' }}</span>
+            </div>
+          }
+          <div class="flex items-center justify-between pt-2 border-t border-hairline">
+            <span class="font-body text-sm uppercase tracking-wide text-ink/70">Total</span>
+            <span class="font-body font-semibold text-xl text-ink">{{ o.totalAmount | currency: 'BRL' }}</span>
+          </div>
+        </div>
+
+        @if (o.recipientName) {
+          <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-1 mb-6">
+            <h2 class="font-body text-xs uppercase tracking-wide text-ink/50 mb-2">Entrega</h2>
+            <p class="font-body text-ink">{{ o.recipientName }}</p>
+            <p class="font-body text-sm text-ink/60">{{ o.shippingCity }}/{{ o.shippingState }}</p>
+            @if (o.trackingCode) {
+              <p class="font-body text-sm text-ink/50 mt-1">Rastreio: {{ o.trackingCode }}</p>
+            }
+          </div>
+        }
+
+        @if (d.payments.length > 0) {
+          <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-2 mb-6">
+            <h2 class="font-body text-xs uppercase tracking-wide text-ink/50 mb-1">Pagamentos</h2>
+            @for (payment of d.payments; track payment.id) {
+              <div class="flex items-center justify-between font-body text-sm">
+                <span class="text-ink/70">{{ payment.transactionId }}</span>
+                <span class="text-ink font-semibold">{{ payment.status }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (o.refundReason) {
+          <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 flex flex-col gap-1 mb-6">
+            <h2 class="font-body text-xs uppercase tracking-wide text-ink/50 mb-2">Estorno solicitado</h2>
+            <p class="font-body text-sm text-ink/70">Motivo: {{ o.refundReason }}</p>
+          </div>
+        }
+      }
+
+      @if (tab() === 'acoes') {
+        @if (!hasActions()) {
+          <p class="font-body text-base text-ink/60">Nenhuma ação disponível pro status atual do pedido.</p>
+        } @else {
+          <div class="flex flex-wrap gap-3">
+            @if (canMarkPaid()) {
+              <button
+                type="button"
+                (click)="markAsPaid()"
+                [disabled]="submitting()"
+                class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-5 py-3 disabled:opacity-60"
+              >
+                Marcar como pago
+              </button>
+            }
+
+            @if (canShip() && !showShipForm()) {
+              <button
+                type="button"
+                (click)="toggleShipForm()"
+                class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-5 py-3"
+              >
+                Marcar como enviado
+              </button>
+            }
+
+            @if (canDeliver()) {
+              <button
+                type="button"
+                (click)="deliver()"
+                [disabled]="submitting()"
+                class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-5 py-3 disabled:opacity-60"
+              >
+                Marcar como entregue
+              </button>
+            }
+
+            @if (canCancel()) {
+              <button
+                type="button"
+                (click)="cancelOrder()"
+                [disabled]="submitting()"
+                class="font-body font-semibold text-sm uppercase tracking-wide text-clay border border-clay rounded-full px-5 py-3 hover:bg-clay hover:text-canvas transition-colors disabled:opacity-60"
+              >
+                Cancelar pedido
+              </button>
+            }
+
+            @if (canDecideRefund()) {
+              <button
+                type="button"
+                (click)="approveRefund()"
+                [disabled]="submitting()"
+                class="font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest border border-ink rounded-full px-5 py-3 disabled:opacity-60"
+              >
+                Aprovar estorno
+              </button>
+              <button
+                type="button"
+                (click)="denyRefund()"
+                [disabled]="submitting()"
+                class="font-body font-semibold text-sm uppercase tracking-wide text-clay border border-clay rounded-full px-5 py-3 hover:bg-clay hover:text-canvas transition-colors disabled:opacity-60"
+              >
+                Negar estorno
+              </button>
+            }
+          </div>
+
+          @if (showShipForm()) {
+            <div class="bg-surface border border-hairline rounded-3xl p-5 sm:p-6 mt-4 flex flex-col gap-3">
+              <label for="f-campo-1" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Código de rastreio</label>
+              <input id="f-campo-1"
+                type="text"
+                [value]="trackingCode()"
+                (input)="trackingCode.set($any($event.target).value)"
+                class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+              />
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  (click)="toggleShipForm()"
+                  class="font-body text-sm uppercase tracking-wide text-ink/60 border border-hairline rounded-full px-5 py-3"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  (click)="submitShip()"
+                  [disabled]="submitting() || trackingCode().trim().length === 0"
+                  class="flex-1 font-body font-semibold text-sm uppercase tracking-wide text-canvas bg-forest rounded-full px-5 py-3 disabled:opacity-60"
+                >
+                  {{ submitting() ? 'Enviando…' : 'Confirmar envio' }}
+                </button>
+              </div>
+            </div>
+          }
+        }
+      }
+    }
+  </main>
+</div>

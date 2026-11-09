@@ -1,0 +1,147 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface border border-hairline rounded-3xl p-5 sm:p-8 flex flex-col gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="flex flex-col gap-1.5">
+      <label for="f-label" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Apelido</label>
+      <input id="f-label"
+ autocomplete="off"
+        type="text"
+        formControlName="label"
+        placeholder="Casa, trabalho…"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="f-recipientName" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Destinatário</label>
+      <input id="f-recipientName"
+ autocomplete="name"
+        type="text"
+        formControlName="recipientName"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="flex flex-col gap-1.5">
+      <label for="f-recipientPhone" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Telefone</label>
+      <input id="f-recipientPhone"
+ autocomplete="tel"
+        type="tel"
+        inputmode="tel"
+        maxlength="16"
+        appMask="phone"
+        formControlName="recipientPhone"
+        placeholder="(11) 91234-5678"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="f-zipCode" class="font-body text-[11px] tracking-wide uppercase text-ink/70">CEP</label>
+      <input id="f-zipCode"
+ autocomplete="postal-code"
+ inputmode="numeric"
+        type="text"
+        maxlength="9"
+        appMask="cep"
+        (input)="onZipInput($event)"
+        formControlName="zipCode"
+        placeholder="00000-000"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+      @if (cepLoading()) {
+        <span class="font-body text-[11px] text-ink/50">Buscando endereço…</span>
+      } @else if (cepError()) {
+        <span class="font-body text-[11px] text-danger">{{ cepError() }}</span>
+      } @else {
+        <span class="font-body text-[11px] text-ink/40">Preenche rua, bairro e cidade automaticamente.</span>
+      }
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="flex flex-col gap-1.5 col-span-1 sm:col-span-2">
+      <label for="f-street" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Rua</label>
+      <input id="f-street"
+ autocomplete="address-line1"
+        type="text"
+        formControlName="street"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="f-number" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Número</label>
+      <input id="f-number"
+ autocomplete="off"
+        type="text"
+        formControlName="number"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="f-complement" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Complemento (opcional)</label>
+    <input id="f-complement"
+ autocomplete="address-line2"
+      type="text"
+      formControlName="complement"
+      class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="flex flex-col gap-1.5 col-span-1 sm:col-span-2">
+      <label for="f-neighborhood" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Bairro</label>
+      <input id="f-neighborhood"
+ autocomplete="address-level3"
+        type="text"
+        formControlName="neighborhood"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="f-state" class="font-body text-[11px] tracking-wide uppercase text-ink/70">UF</label>
+      <input id="f-state"
+ autocomplete="address-level1"
+        type="text"
+        formControlName="state"
+        maxlength="2"
+        class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10 uppercase"
+      />
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="f-city" class="font-body text-[11px] tracking-wide uppercase text-ink/70">Cidade</label>
+    <input id="f-city"
+ autocomplete="address-level2"
+      type="text"
+      formControlName="city"
+      class="font-body border border-hairline rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-forest focus:ring-4 focus:ring-forest/10"
+    />
+  </div>
+
+  <label class="flex items-center gap-2 font-body text-[11px] tracking-wide uppercase text-ink/70">
+    <input type="checkbox" formControlName="isDefault" class="accent-forest" />
+    Definir como endereço padrão
+  </label>
+
+  <div class="flex gap-3 mt-2">
+    @if (showCancel) {
+      <button
+        type="button"
+        (click)="cancel.emit()"
+        class="font-body text-xs uppercase tracking-wide text-ink/60 border border-hairline rounded-full px-5 py-3"
+      >
+        Cancelar
+      </button>
+    }
+    <button
+      type="submit"
+      [disabled]="submitting"
+      class="flex-1 font-body font-semibold text-base px-7 py-3 rounded-full border border-ink bg-forest text-canvas  disabled:opacity-60"
+    >
+      {{ submitting ? 'Salvando…' : 'Salvar endereço' }}
+    </button>
+  </div>
+</form>

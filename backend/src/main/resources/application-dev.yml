@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:demo}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: debug
+    org.springframework.security: debug
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+app:
+  payment:
+    provider: fake
+    # só em dev: cliente escolhe o resultado (simulateOutcome) e o webhook fake é público
+    fake-open-simulation: true
+  shipping:
+    provider: fake
+  cookie:
+    secure: false
+  stock:
+    reservation-expiration-minutes: 2  # curto em dev, só pra testar o job sem esperar muito
+  order:
+    checkout-expiration-minutes: 2  # curto em dev, pra testar o job sem esperar muito
+
+jwt:
+  # default só para dev local — nunca usar este valor em produção
+  secret: ${JWT_SECRET:dev-secret-nao-usar-em-producao-troque-isso}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+server:
+  error:
+    include-stacktrace: always
+    include-message: always
+
+
