@@ -17,8 +17,8 @@ com um recorte de segurança: **HTTPS seletivo com certificado gerado por OpenSS
 - **HTTPS só onde é necessário (não global).** As páginas públicas (institucional,
   catálogo) ficam em **HTTP (porta 8080)**. As páginas e APIs sensíveis — login, cadastro,
   checkout, pedidos, conta, admin — são forçadas para **HTTPS (porta 8443)**.
-  - No backend: `requiresChannel(...).requiresSecure()` apenas nas rotas sensíveis
-    (`SecurityConfig`), com dois conectores Tomcat (`SasiServerConfig`).
+  - No backend: dois conectores Tomcat (`SasiServerConfig`) e um filtro
+    (`SasiChannelRedirectFilter`) que devolve 302 HTTP→HTTPS só nas rotas sensíveis.
   - No frontend: `secureChannelGuard` salta do conector HTTP para o HTTPS ao entrar numa
     rota sensível.
 - **Página social/institucional** (HTTP) com a empresa e a **política de segurança**, e
@@ -113,7 +113,7 @@ jequi-sasi/
 |---|---|
 | `certs/generate-certs.sh` | gera CA, certificado do servidor e keystore PKCS#12 |
 | `backend/.../common/config/SasiServerConfig.java` | conector HTTP (8080) ao lado do HTTPS (8443) |
-| `backend/.../security/config/SecurityConfig.java` | `requiresChannel` força HTTPS nas rotas sensíveis |
+| `backend/.../common/config/SasiChannelRedirectFilter.java` | 302 HTTP→HTTPS só nas rotas sensíveis |
 | `backend/.../common/config/SpaResourceConfig.java` | serve a SPA e faz fallback das rotas do Angular |
 | `backend/src/main/resources/application-sasi.yml` | porta 8443 + SSL + flags do perfil |
 | `frontend/.../core/guards/secure-channel.guard.ts` | salta do HTTP para o HTTPS nas rotas sensíveis |

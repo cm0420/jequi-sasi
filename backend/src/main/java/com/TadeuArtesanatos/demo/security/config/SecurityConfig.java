@@ -43,16 +43,6 @@ public class SecurityConfig {
     @Value("${app.payment.fake-open-simulation:false}")
     private boolean fakePaymentOpenSimulation;
 
-    // profile sasi: força HTTPS só nas rotas sensíveis (login, checkout, conta, APIs de dados).
-    @Value("${app.require-ssl-on-sensitive:false}")
-    private boolean requireSslOnSensitive;
-
-    @Value("${app.http-port:8080}")
-    private int httpPort;
-
-    @Value("${server.port:8443}")
-    private int httpsPort;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -144,18 +134,9 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider(passwordEncoder()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // profile sasi: HTTPS obrigatório nas rotas sensíveis; o resto (social, catálogo,
-        // assets) fica disponível em HTTP e HTTPS. Não é "global" — só onde tem dado sensível.
-        if (requireSslOnSensitive) {
-            http.requiresChannel(channel -> channel
-                            .requestMatchers(
-                                    "/auth/**", "/api/customers/**", "/api/orders/**", "/api/payments/**",
-                                    "/login", "/signup", "/carrinho", "/checkout", "/checkout/**",
-                                    "/cliente", "/cliente/**", "/pedidos", "/pedidos/**", "/admin", "/admin/**"
-                            ).requiresSecure())
-                    .portMapper(mapper -> mapper.http(httpPort).mapsTo(httpsPort));
-        }
-
+        // HTTPS obrigatório nas rotas sensíveis fica no SasiChannelRedirectFilter (profile sasi):
+        // o requiresChannel do Spring Security foi removido na versão 7, então o salto
+        // HTTP->HTTPS é feito num filtro próprio, mantendo o HTTPS seletivo (não global).
         return http.build();
     }
 
